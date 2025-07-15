@@ -115,7 +115,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
             href={`/quiz/${quiz.id}`}
             className="flex-1 bg-gray-900 text-white text-center py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
           >
-            {quiz.progress > 0 ? "Continue" : "Start Quiz"}
+            {quiz.progress > 0 ? "Continue" : "View Details"}
           </Link>
           <button className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
             <svg
