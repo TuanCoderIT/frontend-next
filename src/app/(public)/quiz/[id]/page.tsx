@@ -112,7 +112,7 @@ export default function QuizDetailPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-screen-lg mx-auto px-6 py-8">
         {/* Breadcrumb */}
         <nav className="mb-8">
           <ol className="flex items-center space-x-2 text-sm text-gray-600">
