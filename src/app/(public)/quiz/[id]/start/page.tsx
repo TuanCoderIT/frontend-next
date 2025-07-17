@@ -1,214 +1,143 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { QuizData, RawQuestion } from "@/lib/types/question";
 import QuizTimer from "@/components/quiz/QuizTimer";
 import QuizProgress from "@/components/quiz/QuizProgress";
 import QuestionCard from "@/components/quiz/QuestionCard";
 import QuizNavigation from "@/components/quiz/QuizNavigation";
+import { getQuizById } from "@/lib/api";
 
-// Mock quiz full data with questions
-const mockQuizData = {
-  id: 1,
-  title: "JavaScript Fundamentals",
-  duration: 30, // minutes
-  questions: [
-    {
-      id: 1,
-      question: "What is the correct way to declare a variable in JavaScript?",
-      options: [
-        "var myVariable = 'value';",
-        "variable myVariable = 'value';",
-        "v myVariable = 'value';",
-        "declare myVariable = 'value';",
-      ],
-      correctAnswer: 0,
-      explanation:
-        "The 'var' keyword is one of the correct ways to declare variables in JavaScript, along with 'let' and 'const'.",
-    },
-    {
-      id: 2,
-      question: "Which of the following is NOT a JavaScript data type?",
-      options: ["String", "Boolean", "Integer", "Undefined"],
-      correctAnswer: 2,
-      explanation:
-        "JavaScript doesn't have a specific 'Integer' data type. Numbers in JavaScript are all floating-point.",
-    },
-    {
-      id: 3,
-      question: "What does the '===' operator do in JavaScript?",
-      options: [
-        "Assigns a value",
-        "Compares values only",
-        "Compares values and types",
-        "Performs addition",
-      ],
-      correctAnswer: 2,
-      explanation:
-        "The '===' operator performs strict equality comparison, checking both value and type.",
-    },
-    {
-      id: 4,
-      question: "How do you create a function in JavaScript?",
-      options: [
-        "function myFunction() {}",
-        "create myFunction() {}",
-        "def myFunction() {}",
-        "func myFunction() {}",
-      ],
-      correctAnswer: 0,
-      explanation:
-        "Functions in JavaScript are declared using the 'function' keyword.",
-    },
-    {
-      id: 5,
-      question: "What is the result of '3' + 2 in JavaScript?",
-      options: ["5", "'32'", "Error", "NaN"],
-      correctAnswer: 1,
-      explanation:
-        "JavaScript performs string concatenation when one operand is a string, resulting in '32'.",
-    },
-  ],
-};
-
-export default function QuizStartPage({ params }: { params: { id: string } }) {
+export default function QuizStartPage() {
   const router = useRouter();
-  const [quizData] = useState(mockQuizData);
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const [quizData, setQuizData] = useState<QuizData | null>(null);
+  const [answers, setAnswers] = useState<number[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<number[]>(
-    new Array(mockQuizData.questions.length).fill(-1)
-  );
-  const [timeLeft, setTimeLeft] = useState(mockQuizData.duration * 60); // Convert to seconds
+  const [timeLeft, setTimeLeft] = useState(0);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
 
-  // Fetch quiz full data with questions
+  // Fetch quiz data
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
         setIsLoading(true);
-        // TODO: Fetch quiz full info from API
-        // const response = await fetch(`/api/exams/${params.id}?with=questions`);
-        // const data = await response.json();
-        // setQuizData(data);
+        const raw = await getQuizById(Number(id));
 
-        console.log(`Fetching quiz full data for ID: ${params.id}`);
-        // Simulate API call
-        setTimeout(() => {
-          setIsLoading(false);
-          setQuizStarted(true);
-        }, 1000);
-      } catch (error) {
-        console.error("Failed to fetch quiz data:", error);
+        // Normalize backend -> frontend shape
+        const normalized: QuizData = {
+          id: raw.id,
+          title: raw.title,
+          duration: raw.duration,
+          questions: (raw.questions as RawQuestion[]).map((q) => ({
+            id: q.id,
+            question: q.content,
+            options: Object.values(q.options),
+            correctAnswer: Object.keys(q.options).indexOf(q.answer),
+            explanation: q.explanation || "",
+          })),
+        };
+
+        setQuizData(normalized);
+        setTimeLeft(normalized.duration * 60);
+        setAnswers(new Array(normalized.questions.length).fill(-1));
+        setIsLoading(false);
+      } catch (err) {
+        console.error(err);
         setIsLoading(false);
       }
     };
 
     fetchQuizData();
-  }, [params.id]);
+  }, [id]);
 
-  const handleSubmitQuiz = useCallback(async () => {
-    try {
-      // Calculate results
-      const results = {
-        examId: params.id,
-        answers: answers.map((answer, index) => ({
-          questionId: quizData.questions[index].id,
-          selectedAnswer: answer,
-        })),
-        timeSpent: quizData.duration * 60 - timeLeft,
-        completedAt: new Date().toISOString(),
-      };
+  const handleSubmitQuiz = useCallback(() => {
+    if (!quizData) return;
 
-      // TODO: Submit results to API
-      // const response = await fetch(`/api/exams/${params.id}/submit`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(results)
-      // });
-      // const submissionResult = await response.json();
+    const results = {
+      examId: quizData.id,
+      answers: answers.map((answer, idx) => ({
+        questionId: quizData.questions[idx].id,
+        selectedAnswer: answer,
+      })),
+      timeSpent: quizData.duration * 60 - timeLeft,
+      completedAt: new Date().toISOString(),
+    };
 
-      console.log("Submitting quiz results:", results);
+    console.log("Submitting:", results);
 
-      // Calculate score for results page
-      const score = answers.reduce((total, answer, index) => {
-        return (
-          total + (answer === quizData.questions[index].correctAnswer ? 1 : 0)
-        );
-      }, 0);
+    // TODO: POST to backend if needed
 
-      // Store results in sessionStorage for the results page
-      sessionStorage.setItem(
-        "quizResults",
-        JSON.stringify({
-          quiz: quizData,
-          results: {
-            answers,
-            score,
-            total: quizData.questions.length,
-            timeSpent: quizData.duration * 60 - timeLeft,
-          },
-        })
-      );
+    console.log("Answers:", answers);
+    console.log(
+      "Correct answers:",
+      quizData.questions.map((q) => q.correctAnswer)
+    );
 
-      router.push(`/quiz/${params.id}/results`);
-    } catch (error) {
-      console.error("Failed to submit quiz:", error);
-      // Handle error - show toast or error message
-    }
-  }, [answers, timeLeft, router, params.id, quizData]);
+    sessionStorage.setItem(
+      "quizResults",
+      JSON.stringify({
+        quiz: quizData,
+        results: {
+          answers,
+          score: answers.reduce(
+            (total, ans, idx) =>
+              total + (ans === quizData.questions[idx].correctAnswer ? 1 : 0),
+            0
+          ),
+          total: quizData.questions.length,
+          timeSpent: quizData.duration * 60 - timeLeft,
+        },
+      })
+    );
 
-  // Timer effect
+    router.push(`/quiz/${quizData.id}/results`);
+  }, [quizData, answers, timeLeft, router]);
+
+  // Timer countdown
   useEffect(() => {
     if (!quizStarted) return;
-
     if (timeLeft <= 0) {
       handleSubmitQuiz();
       return;
     }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-
+    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, handleSubmitQuiz, quizStarted]);
+  }, [timeLeft, quizStarted, handleSubmitQuiz]);
 
   const handleAnswerSelect = (answerIndex: number) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = answerIndex;
-    setAnswers(newAnswers);
+    const updated = [...answers];
+    updated[currentQuestion] = answerIndex;
+    setAnswers(updated);
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestion < quizData.questions.length - 1) {
+  const handleNext = () => {
+    if (currentQuestion < (quizData?.questions.length || 0) - 1) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
 
-  const handlePreviousQuestion = () => {
+  const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
     }
   };
 
-  const handleQuestionJump = (questionIndex: number) => {
-    setCurrentQuestion(questionIndex);
+  const handleJump = (idx: number) => {
+    setCurrentQuestion(idx);
   };
 
-  const answeredQuestions = answers.filter((answer) => answer !== -1).length;
-  const progressPercentage =
-    (answeredQuestions / quizData.questions.length) * 100;
+  const answered = answers.filter((a) => a !== -1).length;
+  const progress = (answered / (quizData?.questions.length || 1)) * 100;
 
-  // Loading state
-  if (isLoading) {
+  if (isLoading || !quizData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading quiz questions...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div>Loading quiz...</div>
       </div>
     );
   }
@@ -231,7 +160,7 @@ export default function QuizStartPage({ params }: { params: { id: string } }) {
               <QuizTimer timeLeft={timeLeft} />
               <button
                 onClick={() => setShowConfirmSubmit(true)}
-                className="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                className="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700"
               >
                 Submit Quiz
               </button>
@@ -239,56 +168,51 @@ export default function QuizStartPage({ params }: { params: { id: string } }) {
           </div>
           <div className="mt-4">
             <QuizProgress
-              current={answeredQuestions}
+              current={answered}
               total={quizData.questions.length}
-              percentage={progressPercentage}
+              percentage={progress}
             />
           </div>
         </div>
 
-        {/* Question Card */}
-        <div className="mb-8">
-          <QuestionCard
-            question={quizData.questions[currentQuestion]}
-            selectedAnswer={answers[currentQuestion]}
-            onAnswerSelect={handleAnswerSelect}
-            questionNumber={currentQuestion + 1}
-          />
-        </div>
+        {/* Question */}
+        <QuestionCard
+          question={quizData.questions[currentQuestion]}
+          selectedAnswer={answers[currentQuestion]}
+          onAnswerSelect={handleAnswerSelect}
+          questionNumber={currentQuestion + 1}
+        />
 
-        {/* Navigation */}
+        {/* Nav */}
         <QuizNavigation
           currentQuestion={currentQuestion}
           totalQuestions={quizData.questions.length}
           answers={answers}
-          onPrevious={handlePreviousQuestion}
-          onNext={handleNextQuestion}
-          onQuestionJump={handleQuestionJump}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onQuestionJump={handleJump}
           onSubmit={() => setShowConfirmSubmit(true)}
         />
 
-        {/* Submit Confirmation Modal */}
+        {/* Confirm */}
         {showConfirmSubmit && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-8 max-w-md mx-4">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Submit Quiz?
-              </h3>
-              <p className="text-gray-600 mb-6">
-                You have answered {answeredQuestions} out of{" "}
-                {quizData.questions.length} questions. Are you sure you want to
-                submit your quiz?
+              <h3 className="text-xl font-bold mb-4">Submit Quiz?</h3>
+              <p className="mb-6">
+                Answered {answered} of {quizData.questions.length}. Are you
+                sure?
               </p>
               <div className="flex gap-4">
                 <button
                   onClick={() => setShowConfirmSubmit(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 border rounded-lg"
                 >
-                  Continue Quiz
+                  Continue
                 </button>
                 <button
                   onClick={handleSubmitQuiz}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg"
                 >
                   Submit Now
                 </button>
@@ -297,30 +221,20 @@ export default function QuizStartPage({ params }: { params: { id: string } }) {
           </div>
         )}
 
-        {/* Quiz Instructions (shown on first load) */}
-        {!quizStarted && !isLoading && (
+        {/* Instructions */}
+        {!quizStarted && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-8 max-w-lg mx-4">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Quiz Instructions
-              </h3>
-              <div className="space-y-3 text-gray-600 mb-6">
-                <p>
-                  • You have {quizData.duration} minutes to complete this quiz
-                </p>
-                <p>
-                  • There are {quizData.questions.length} questions in total
-                </p>
-                <p>• You can navigate between questions freely</p>
-                <p>• Your answers are saved automatically</p>
-                <p>
-                  • Click &quot;Submit Quiz&quot; when you&apos;re ready to
-                  finish
-                </p>
+              <h3 className="text-2xl font-bold mb-4">Quiz Instructions</h3>
+              <div className="space-y-3 mb-6 text-gray-600">
+                <p>• You have {quizData.duration} minutes</p>
+                <p>• {quizData.questions.length} questions total</p>
+                <p>• Navigate freely, autosave answers</p>
+                <p>• Click Submit when done</p>
               </div>
               <button
                 onClick={() => setQuizStarted(true)}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg"
               >
                 Start Quiz Now
               </button>

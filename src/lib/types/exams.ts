@@ -9,3 +9,20 @@ export interface Exam {
   progress: number;
   color: string;
 }
+
+export interface QuizInfo {
+  title: string;
+  description: string;
+  category: string;
+  learning_objectives: string[];
+  prerequisites: string[];
+  tags: string[];
+  total_questions: number;
+  duration: number;
+  difficulty: string;
+  passing_score: number;
+  attempts: number;
+  max_attempts: number;
+  estimated_time: string;
+}
+

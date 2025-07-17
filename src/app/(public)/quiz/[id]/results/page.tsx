@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ScoreCircle from "@/components/quiz/ScoreCircle";
 import AnswerBreakdown from "@/components/quiz/AnswerBreakdown";
@@ -26,12 +26,9 @@ interface QuizResultsData {
   };
 }
 
-export default function QuizResultsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function QuizResultsPage() {
   const router = useRouter();
+  const params = useParams();
   const [resultsData, setResultsData] = useState<QuizResultsData | null>(null);
 
   useEffect(() => {

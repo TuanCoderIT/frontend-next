@@ -1,52 +1,48 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { QuizInfo } from "@/lib/types/exams";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
+import { getQuizById } from "@/lib/api";
 
-// Mock quiz basic info data
-const mockQuizInfo = {
-  id: 1,
-  title: "JavaScript Fundamentals",
-  description:
-    "Master the basics of JavaScript programming with essential concepts and syntax. This comprehensive quiz covers variables, data types, operators, functions, and fundamental programming concepts that every JavaScript developer should know.",
-  category: "Programming",
-  difficulty: "Beginner",
-  duration: 30, // minutes
-  totalQuestions: 25,
-  passingScore: 70,
-  attempts: 0,
-  maxAttempts: 3,
-  estimatedTime: "25-30 minutes",
-  tags: ["JavaScript", "Programming", "Web Development", "Fundamentals"],
-  learningObjectives: [
-    "Understand JavaScript variable declarations and scope",
-    "Master different data types and their usage",
-    "Learn about operators and expressions",
-    "Understand function declarations and expressions",
-    "Apply basic programming concepts in JavaScript",
-  ],
-  prerequisites: [
-    "Basic understanding of programming concepts",
-    "Familiarity with web development basics",
-    "HTML and CSS knowledge (recommended)",
-  ],
-};
-
-export default function QuizDetailPage({ params }: { params: { id: string } }) {
+export default function QuizDetailPage() {
   const router = useRouter();
-  const [quizInfo] = useState(mockQuizInfo);
-  const [isLoading] = useState(false);
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // In real app, fetch quiz info here
   useEffect(() => {
-    // TODO: Fetch quiz basic info from API
-    // fetch(`/api/exams/${params.id}`)
-    console.log(`Fetching quiz info for ID: ${params.id}`);
-  }, [params.id]);
+    const fetchQuizInfo = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getQuizById(Number(id));
+        setQuizInfo(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false); // 👈 Quan trọng!
+      }
+    };
+    fetchQuizInfo();
+  }, [id]);
+
+  if (isLoading || !quizInfo) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading quiz details...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleStartQuiz = () => {
-    router.push(`/quiz/${params.id}/start`);
+    router.push(`/quiz/${id}/start`);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -99,39 +95,11 @@ export default function QuizDetailPage({ params }: { params: { id: string } }) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading quiz details...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-screen-lg mx-auto px-6 py-8">
         {/* Breadcrumb */}
-        <nav className="mb-8">
-          <ol className="flex items-center space-x-2 text-sm text-gray-600">
-            <li>
-              <Link href="/" className="hover:text-blue-600">
-                Home
-              </Link>
-            </li>
-            <li className="text-gray-400">/</li>
-            <li>
-              <Link href="/quiz" className="hover:text-blue-600">
-                Quizzes
-              </Link>
-            </li>
-            <li className="text-gray-400">/</li>
-            <li className="text-gray-900 font-medium">{quizInfo.title}</li>
-          </ol>
-        </nav>
-
+        <Breadcrumbs lastItemLabel={quizInfo.title} />
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Quiz Details */}
@@ -162,7 +130,7 @@ export default function QuizDetailPage({ params }: { params: { id: string } }) {
                 Learning Objectives
               </h2>
               <div className="space-y-3">
-                {quizInfo.learningObjectives.map((objective, index) => (
+                {quizInfo.learning_objectives?.map((objective, index) => (
                   <div key={index} className="flex items-start">
                     <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <svg
@@ -191,7 +159,7 @@ export default function QuizDetailPage({ params }: { params: { id: string } }) {
                 Prerequisites
               </h2>
               <div className="space-y-3">
-                {quizInfo.prerequisites.map((prerequisite, index) => (
+                {quizInfo.prerequisites?.map((prerequisite, index) => (
                   <div key={index} className="flex items-start">
                     <div className="flex-shrink-0 w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <svg
@@ -244,7 +212,7 @@ export default function QuizDetailPage({ params }: { params: { id: string } }) {
                 <div className="flex items-center justify-between py-2 border-b border-gray-100">
                   <span className="text-gray-600 font-medium">Questions:</span>
                   <span className="text-xl font-bold text-gray-900">
-                    {quizInfo.totalQuestions}
+                    {quizInfo.total_questions}
                   </span>
                 </div>
 
@@ -271,21 +239,21 @@ export default function QuizDetailPage({ params }: { params: { id: string } }) {
                     Passing Score:
                   </span>
                   <span className="text-lg font-semibold text-green-600">
-                    {quizInfo.passingScore}%
+                    {quizInfo.passing_score}%
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-2 border-b border-gray-100">
                   <span className="text-gray-600 font-medium">Attempts:</span>
                   <span className="text-lg font-semibold text-gray-900">
-                    {quizInfo.attempts}/{quizInfo.maxAttempts}
+                    {quizInfo.attempts}/{quizInfo.max_attempts}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-2">
                   <span className="text-gray-600 font-medium">Est. Time:</span>
                   <span className="text-sm text-gray-500">
-                    {quizInfo.estimatedTime}
+                    {quizInfo.estimated_time} 15 minutes
                   </span>
                 </div>
               </div>
@@ -295,22 +263,22 @@ export default function QuizDetailPage({ params }: { params: { id: string } }) {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <button
                 onClick={handleStartQuiz}
-                disabled={quizInfo.attempts >= quizInfo.maxAttempts}
+                disabled={quizInfo.attempts >= quizInfo.max_attempts}
                 className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                  quizInfo.attempts >= quizInfo.maxAttempts
+                  quizInfo.attempts >= quizInfo.max_attempts
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
                 }`}
               >
-                {quizInfo.attempts >= quizInfo.maxAttempts
+                {quizInfo.attempts >= quizInfo.max_attempts
                   ? "Max Attempts Reached"
                   : "Start Quiz"}
               </button>
 
-              {quizInfo.attempts < quizInfo.maxAttempts && (
+              {quizInfo.attempts < quizInfo.max_attempts && (
                 <p className="text-center text-sm text-gray-500 mt-3">
                   You have{" "}
-                  <strong>{quizInfo.maxAttempts - quizInfo.attempts}</strong>{" "}
+                  <strong>{quizInfo.max_attempts - quizInfo.attempts}</strong>{" "}
                   attempt(s) remaining
                 </p>
               )}
