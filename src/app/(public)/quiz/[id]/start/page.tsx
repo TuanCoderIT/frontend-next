@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { QuizData, RawQuestion } from "@/lib/types/question";
+import { QuizData, RawQuestion } from "@/types/question";
 import QuizTimer from "@/components/quiz/QuizTimer";
 import QuizProgress from "@/components/quiz/QuizProgress";
 import QuestionCard from "@/components/quiz/QuestionCard";
 import QuizNavigation from "@/components/quiz/QuizNavigation";
-import { getQuizById } from "@/lib/api";
+import { getQuizById, submitQuizResult } from "@/api/public/quiz";
 
 export default function QuizStartPage() {
   const router = useRouter();
@@ -55,48 +55,71 @@ export default function QuizStartPage() {
     fetchQuizData();
   }, [id]);
 
-  const handleSubmitQuiz = useCallback(() => {
-    if (!quizData) return;
+  const handleSubmitQuiz = useCallback(async () => {
+    try {
+      if (!quizData) return;
 
-    const results = {
-      examId: quizData.id,
-      answers: answers.map((answer, idx) => ({
-        questionId: quizData.questions[idx].id,
-        selectedAnswer: answer,
-      })),
-      timeSpent: quizData.duration * 60 - timeLeft,
-      completedAt: new Date().toISOString(),
-    };
+      const score = answers.reduce((total, answer, index) => {
+        return (
+          total + (answer === quizData.questions[index].correctAnswer ? 1 : 0)
+        );
+      }, 0);
 
-    console.log("Submitting:", results);
+      const total = quizData.questions.length;
+      const percentage = Math.round((score / total) * 100);
+      const timeSpent = quizData.duration * 60 - timeLeft;
+      const completedAt = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
 
-    // TODO: POST to backend if needed
+      // await submitQuizResult({
+      //   exam_id: quizData.id,
+      //   user_id: 1,
+      //   score,
+      //   total,
+      //   percentage,
+      //   time_spent: timeSpent,
+      //   completed_at: completedAt,
+      // });
+      const token = localStorage.getItem("token"); // lấy từ localStorage sau login
+      if (!token) {
+        router.push("/auth/login"); // hoặc hiện thông báo
+        return;
+      }
 
-    console.log("Answers:", answers);
-    console.log(
-      "Correct answers:",
-      quizData.questions.map((q) => q.correctAnswer)
-    );
-
-    sessionStorage.setItem(
-      "quizResults",
-      JSON.stringify({
-        quiz: quizData,
-        results: {
-          answers,
-          score: answers.reduce(
-            (total, ans, idx) =>
-              total + (ans === quizData.questions[idx].correctAnswer ? 1 : 0),
-            0
-          ),
-          total: quizData.questions.length,
-          timeSpent: quizData.duration * 60 - timeLeft,
+      await submitQuizResult(
+        {
+          exam_id: quizData.id,
+          score,
+          total,
+          percentage,
+          time_spent: timeSpent,
+          completed_at: completedAt,
         },
-      })
-    );
+        token
+      );
 
-    router.push(`/quiz/${quizData.id}/results`);
-  }, [quizData, answers, timeLeft, router]);
+      // 💾 Lưu kết quả để hiển thị ở trang /results
+      sessionStorage.setItem(
+        "quizResults",
+        JSON.stringify({
+          quiz: quizData,
+          results: {
+            answers,
+            score,
+            total,
+            timeSpent,
+          },
+        })
+      );
+
+      router.push(`/quiz/${params.id}/results`);
+    } catch (error) {
+      console.error("Failed to submit quiz:", error);
+      // TODO: show toast hoặc thông báo lỗi
+    }
+  }, [answers, timeLeft, router, params.id, quizData]);
 
   // Timer countdown
   useEffect(() => {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 interface CrumbMap {
   [key: string]: string; // path segment -> custom label

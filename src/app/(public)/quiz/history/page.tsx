@@ -1,81 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-
-// Mock quiz history data
-const mockQuizHistory = [
-  {
-    id: 1,
-    quizTitle: "JavaScript Fundamentals",
-    category: "Programming",
-    score: 22,
-    total: 25,
-    percentage: 88,
-    timeSpent: "28m 45s",
-    completedAt: "2025-07-15T10:30:00Z",
-    difficulty: "Beginner",
-  },
-  {
-    id: 2,
-    quizTitle: "React Components & Hooks",
-    category: "Programming",
-    score: 24,
-    total: 30,
-    percentage: 80,
-    timeSpent: "42m 12s",
-    completedAt: "2025-07-14T14:15:00Z",
-    difficulty: "Intermediate",
-  },
-  {
-    id: 3,
-    quizTitle: "Data Structures & Algorithms",
-    category: "Computer Science",
-    score: 28,
-    total: 35,
-    percentage: 80,
-    timeSpent: "55m 30s",
-    completedAt: "2025-07-13T16:45:00Z",
-    difficulty: "Advanced",
-  },
-  {
-    id: 4,
-    quizTitle: "Mathematics - Calculus",
-    category: "Mathematics",
-    score: 18,
-    total: 28,
-    percentage: 64,
-    timeSpent: "48m 20s",
-    completedAt: "2025-07-12T09:00:00Z",
-    difficulty: "Intermediate",
-  },
-  {
-    id: 5,
-    quizTitle: "Physics - Mechanics",
-    category: "Science",
-    score: 25,
-    total: 32,
-    percentage: 78,
-    timeSpent: "52m 15s",
-    completedAt: "2025-07-11T11:30:00Z",
-    difficulty: "Intermediate",
-  },
-  {
-    id: 6,
-    quizTitle: "English Grammar",
-    category: "Language",
-    score: 20,
-    total: 22,
-    percentage: 91,
-    timeSpent: "22m 10s",
-    completedAt: "2025-07-10T15:20:00Z",
-    difficulty: "Beginner",
-  },
-];
+import { useAuth } from "@/context/AuthContext";
+import { getUserQuizHistory } from "@/api/public/quiz";
+import { QuizHistoryItem } from "@/types/exams";
 
 export default function QuizHistoryPage() {
   const [sortBy, setSortBy] = useState("recent");
   const [filterCategory, setFilterCategory] = useState("all");
+  const { user } = useAuth();
+  const [history, setHistory] = useState<QuizHistoryItem[]>([]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!user) return;
+      const data = await getUserQuizHistory(user.id);
+      setHistory(data);
+    };
+    fetchHistory();
+  }, [user]);
 
   const getPerformanceColor = (percentage: number) => {
     if (percentage >= 80) return "text-green-600 bg-green-100";
@@ -107,20 +51,21 @@ export default function QuizHistoryPage() {
     });
   };
 
-  const sortedAndFilteredHistory = mockQuizHistory
+  const sortedAndFilteredHistory = history
     .filter(
-      (quiz) => filterCategory === "all" || quiz.category === filterCategory
+      (quiz) =>
+        filterCategory === "all" || quiz.exam.category === filterCategory
     )
     .sort((a, b) => {
       switch (sortBy) {
         case "score":
           return b.percentage - a.percentage;
         case "title":
-          return a.quizTitle.localeCompare(b.quizTitle);
+          return a.exam.title.localeCompare(b.exam.title);
         default: // recent
           return (
-            new Date(b.completedAt).getTime() -
-            new Date(a.completedAt).getTime()
+            new Date(b.completed_at).getTime() -
+            new Date(a.completed_at).getTime()
           );
       }
     });
@@ -224,7 +169,7 @@ export default function QuizHistoryPage() {
         <div className="space-y-4">
           {sortedAndFilteredHistory.map((quiz) => (
             <div
-              key={`${quiz.id}-${quiz.completedAt}`}
+              key={`${quiz.id}-${quiz.completed_at}`}
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col lg:flex-row lg:items-center gap-6">
@@ -233,25 +178,25 @@ export default function QuizHistoryPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {quiz.quizTitle}
+                        {quiz.exam.title}
                       </h3>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-600">
-                          {quiz.category}
+                          {quiz.exam.category}
                         </span>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(
-                            quiz.difficulty
+                            quiz.exam.difficulty
                           )}`}
                         >
-                          {quiz.difficulty}
+                          {quiz.exam.difficulty}
                         </span>
                       </div>
                     </div>
                   </div>
                   <div className="text-sm text-gray-500">
-                    Completed on {formatDate(quiz.completedAt)} • Time spent:{" "}
-                    {quiz.timeSpent}
+                    Completed on {formatDate(quiz.completed_at)} • Time spent:{" "}
+                    {quiz.time_spent}
                   </div>
                 </div>
 

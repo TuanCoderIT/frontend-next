@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { QuizInfo } from "@/lib/types/exams";
+import { QuizInfo } from "@/types/exams";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
-import { getQuizById } from "@/lib/api";
+import { getQuizById } from "@/api/public/quiz";
+import { notify } from "@/utils/toast";
 
 export default function QuizDetailPage() {
   const router = useRouter();
@@ -14,7 +15,6 @@ export default function QuizDetailPage() {
   const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // In real app, fetch quiz info here
   useEffect(() => {
     const fetchQuizInfo = async () => {
       try {
@@ -24,7 +24,7 @@ export default function QuizDetailPage() {
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false); // 👈 Quan trọng!
+        setIsLoading(false);
       }
     };
     fetchQuizInfo();
@@ -42,7 +42,13 @@ export default function QuizDetailPage() {
   }
 
   const handleStartQuiz = () => {
-    router.push(`/quiz/${id}/start`);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      notify.error("You must be logged in to start the quiz.");
+      router.push("/auth/login?redirect=/quiz/" + quizInfo.id + "/start");
+    } else {
+      router.push(`/quiz/${quizInfo.id}/start`);
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {

@@ -23,7 +23,7 @@ export default function Footer() {
                   />
                 </svg>
               </div>
-              <span className="text-xl font-bold">StudyPlatform</span>
+              <span className="text-xl font-bold">IntelliQuiz</span>
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
               Empowering students worldwide with interactive learning
@@ -151,7 +151,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © 2025 StudyPlatform. All rights reserved.
+            © 2025 IntelliQuiz. All rights reserved.
           </p>
         </div>
       </div>

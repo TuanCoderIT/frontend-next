@@ -1,0 +1,65 @@
+// context/AuthContext.tsx
+"use client";
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { User } from "@/types/user";
+import { fetchUser, loginApi, registerApi, logoutApi } from "@/api/public/auth";
+import { API } from "@/api/axios";
+
+interface AuthContextProps {
+  user: User | null;
+  token: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    if (savedToken) {
+      setToken(savedToken);
+      API.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
+      fetchUser()
+        .then(setUser)
+        .catch((err: any) => console.error("Lỗi khi lấy user:", err));
+    }
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const data = await loginApi(email, password);
+    setToken(data.token);
+    setUser(data.user);
+    API.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    localStorage.setItem("token", data.token);
+  };
+
+  const register = async (name: string, email: string, password: string) => {
+    const data = await registerApi(name, email, password);
+    setToken(data.token);
+    setUser(data.user);
+    API.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    localStorage.setItem("token", data.token);
+  };
+
+  const logout = async () => {
+    await logoutApi();
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem("token");
+    delete API.defaults.headers.common["Authorization"];
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);

@@ -1,6 +1,40 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Đóng dropdown khi click bên ngoài
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsDropdownOpen(false);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-screen-xl mx-auto px-6">
@@ -22,9 +56,7 @@ export default function Navbar() {
                 />
               </svg>
             </div>
-            <span className="text-xl font-bold text-gray-900">
-              StudyPlatform
-            </span>
+            <span className="text-xl font-bold text-gray-900">IntelliQuiz</span>
           </Link>
 
           {/* Navigation Links */}
@@ -51,15 +83,80 @@ export default function Navbar() {
 
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
-            <button className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Login
-            </button>
-            <Link
-              href="/account"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Sign Up
-            </Link>
+            {user ? (
+              // Hiển thị khi đã đăng nhập
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="font-medium">{user.name}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <Link
+                      href="/account"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      My Account
+                    </Link>
+                    <Link
+                      href="/quiz"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      My Quizzes
+                    </Link>
+                    <hr className="my-2" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Hiển thị khi chưa đăng nhập
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

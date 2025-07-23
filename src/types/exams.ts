@@ -11,6 +11,7 @@ export interface Exam {
 }
 
 export interface QuizInfo {
+  id: number;
   title: string;
   description: string;
   category: string;
@@ -24,5 +25,22 @@ export interface QuizInfo {
   attempts: number;
   max_attempts: number;
   estimated_time: string;
+}
+
+export interface QuizHistoryItem {
+  id: number;
+  user_id: number;
+  exam_id: number;
+  score: number;
+  total: number;
+  percentage: number;
+  time_spent: number;
+  completed_at: string;
+  exam: {
+    id: number;
+    title: string;
+    category: string;
+    difficulty: "Beginner" | "Intermediate" | "Advanced";
+  };
 }
 
