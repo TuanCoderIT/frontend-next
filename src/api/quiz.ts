@@ -1,5 +1,5 @@
-import { API } from '@/api/axios';
-import { QuizHistoryItem } from '@/types/exams';
+import { axiosAPI } from '@/api/axios';
+import { QuizHistoryItem } from '@/types/public/exams';
 
 // Exam quiz API
 export const getQuizzes = async (categoryId?: number | string) => {
@@ -7,18 +7,18 @@ export const getQuizzes = async (categoryId?: number | string) => {
     if (categoryId && categoryId !== "All") {
         url += `?category_id=${categoryId}`;
     }
-    const res = await API.get(url);
+    const res = await axiosAPI.get(url);
     return res.data;
 };
 
 export const getQuizById = async (id: number) => {
-  const res = await API.get(`/exams/${id}`);
+  const res = await axiosAPI.get(`/exams/${id}`);
   return res.data;
 };
 
 // Category API
 export const getCategories = async () => {
-  const res = await API.get("/categories");
+  const res = await axiosAPI.get("/categories");
   return res.data;
 };
 
@@ -34,7 +34,7 @@ export const submitQuizResult = async (
   },
   token: string
 ) => {
-  const res = await API.post("/results", payload, {
+  const res = await axiosAPI.post("/results", payload, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -43,7 +43,7 @@ export const submitQuizResult = async (
 };
 
 export const getUserQuizHistory = async (userId: number) => {
-  const res = await API.get(`/results?user_id=${userId}`);
+  const res = await axiosAPI.get(`/results?user_id=${userId}`);
   return res.data as QuizHistoryItem[];
 };
 

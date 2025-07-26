@@ -1,6 +1,7 @@
 import "@/app/globals.css";
-import Sidebar from "@/components/admin/Sidebar";
 import Header from "@/components/admin/Header";
+import Sidebar from "@/components/admin/Sidebar";
+import { ProgressBar } from "@lexz451/next-nprogress";
 
 export default function AdminLayout({
   children,
@@ -12,7 +13,16 @@ export default function AdminLayout({
       <Sidebar />
       <div className="flex flex-col flex-1">
         <Header />
-        <main className="p-4">{children}</main>
+        <main className="px-4 py-2 overflow-auto bg-gray-50">
+          <ProgressBar
+            color="#155dfc"
+            height="2px"
+            options={{
+              showSpinner: false,
+            }}
+          />
+          {children}
+        </main>
       </div>
     </div>
   );

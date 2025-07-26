@@ -1,4 +1,4 @@
-import { CategoryFilterProps } from "@/types/category";
+import { CategoryFilterProps } from "@/types/public/category";
 
 export default function CategoryFilter({
   categories,

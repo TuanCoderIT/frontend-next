@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { QuizInfo } from "@/types/exams";
+import { QuizInfo } from "@/types/public/exams";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
-import { getQuizById } from "@/api/public/quiz";
+import { getQuizById } from "@/api/quiz";
 import { notify } from "@/utils/toast";
 
 export default function QuizDetailPage() {

@@ -2,9 +2,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { User } from "@/types/user";
-import { fetchUser, loginApi, registerApi, logoutApi } from "@/api/public/auth";
-import { API } from "@/api/axios";
+import { User } from "@/types/public/user";
+import { fetchUser, loginApi, registerApi, logoutApi } from "@/api/auth";
+import { axiosAPI } from "@/api/axios";
 
 interface AuthContextProps {
   user: User | null;
@@ -24,7 +24,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const savedToken = localStorage.getItem("token");
     if (savedToken) {
       setToken(savedToken);
-      API.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
+      axiosAPI.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${savedToken}`;
       fetchUser()
         .then(setUser)
         .catch((err: any) => console.error("Lỗi khi lấy user:", err));
@@ -35,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const data = await loginApi(email, password);
     setToken(data.token);
     setUser(data.user);
-    API.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    axiosAPI.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
     localStorage.setItem("token", data.token);
   };
 
@@ -43,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const data = await registerApi(name, email, password);
     setToken(data.token);
     setUser(data.user);
-    API.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    axiosAPI.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
     localStorage.setItem("token", data.token);
   };
 
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
-    delete API.defaults.headers.common["Authorization"];
+    delete axiosAPI.defaults.headers.common["Authorization"];
   };
 
   return (

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getQuizzes, getCategories } from "@/api/public/quiz";
+import { getQuizzes, getCategories } from "@/api/quiz";
 import QuizCard from "@/components/quiz/QuizCard";
 import SearchBar from "@/components/quiz/SearchBar";
 import CategoryFilter from "@/components/quiz/CategoryFilter";
-import { Exam } from "@/types/exams";
-import { Category } from "@/types/category";
+import { Exam } from "@/types/public/exams";
+import { Category } from "@/types/public/category";
 
 export default function QuizListPage() {
   const [quizzes, setQuizzes] = useState<Exam[]>([]);

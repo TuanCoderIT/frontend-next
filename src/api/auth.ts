@@ -1,14 +1,12 @@
-// libs/auth.ts hoặc api/auth.ts
-
-import { API } from "@/api/axios";
+import { axiosAPI } from "@/api/axios";
 
 export const fetchUser = async () => {
-  const res = await API.get("/user");
+  const res = await axiosAPI.get("/user");
   return res.data;
 };
 
 export const loginApi = async (email: string, password: string) => {
-  const res = await API.post("/login", { email, password });
+  const res = await axiosAPI.post("/login", { email, password });
   return res.data;
 };
 
@@ -17,7 +15,7 @@ export const registerApi = async (
   email: string,
   password: string
 ) => {
-  const res = await API.post("/register", {
+  const res = await axiosAPI.post("/register", {
     name,
     email,
     password,
@@ -27,5 +25,5 @@ export const registerApi = async (
 };
 
 export const logoutApi = async () => {
-  await API.post("/logout");
+  await axiosAPI.post("/logout");
 };

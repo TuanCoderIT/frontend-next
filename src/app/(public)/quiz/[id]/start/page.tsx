@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback, use } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { QuizData, RawQuestion } from "@/types/question";
+import { QuizData, RawQuestion } from "@/types/public/question";
 import QuizTimer from "@/components/quiz/QuizTimer";
 import QuizProgress from "@/components/quiz/QuizProgress";
 import QuestionCard from "@/components/quiz/QuestionCard";
 import QuizNavigation from "@/components/quiz/QuizNavigation";
-import { getQuizById, submitQuizResult } from "@/api/public/quiz";
+import { getQuizById, submitQuizResult } from "@/api/quiz";
 
 export default function QuizStartPage() {
   const router = useRouter();

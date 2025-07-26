@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { getUserQuizHistory } from "@/api/public/quiz";
-import { QuizHistoryItem } from "@/types/exams";
+import { getUserQuizHistory } from "@/api/quiz";
+import { QuizHistoryItem } from "@/types/public/exams";
 
 export default function QuizHistoryPage() {
   const [sortBy, setSortBy] = useState("recent");
