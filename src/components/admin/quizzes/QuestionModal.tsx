@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Question } from "@/types/admin/admin";
+import { convertOptionsArrayToObject } from "@/utils/questionUtils";
 
 interface QuestionModalProps {
   question: Question | null;
@@ -19,14 +20,14 @@ export default function QuestionModal({
   onSave,
 }: QuestionModalProps) {
   const [formData, setFormData] = useState({
-    question_text: "",
+    content: "",
     type: "multiple_choice" as
       | "multiple_choice"
       | "true_false"
       | "short_answer"
       | "essay",
     options: ["", "", "", ""],
-    correct_answers: [""],
+    answer: [""],
     explanation: "",
     points: 1,
   });
@@ -34,20 +35,23 @@ export default function QuestionModal({
   useEffect(() => {
     if (question && mode === "edit") {
       setFormData({
-        question_text: question.question_text,
+        content: question.content,
         type: question.type,
-        options: question.options || ["", "", "", ""],
-        correct_answers: question.correct_answers,
+        // options: question.options || ["", "", "", ""],
+        options: question.options
+          ? Object.values(question.options)
+          : ["", "", "", ""],
+        answer: question.answer || [""],
         explanation: question.explanation || "",
         points: question.points,
       });
     } else {
       // Reset form for create mode
       setFormData({
-        question_text: "",
+        content: "",
         type: "multiple_choice",
         options: ["", "", "", ""],
-        correct_answers: [""],
+        answer: [""],
         explanation: "",
         points: 1,
       });
@@ -57,18 +61,16 @@ export default function QuestionModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Clean up data based on question type
-    let cleanedData: Partial<Question> = { ...formData };
+    // Omit 'options' from the spread to avoid type error, then assign it correctly
+    const { options, ...rest } = formData;
+    let cleanedData: Partial<Question> = { ...rest };
 
     if (formData.type === "true_false") {
-      cleanedData.options = ["True", "False"];
+      cleanedData.options = { A: "True", B: "False" };
     } else if (formData.type === "short_answer" || formData.type === "essay") {
-      cleanedData.options = [];
+      cleanedData.options = {};
     } else {
-      // Multiple choice - filter out empty options
-      cleanedData.options = formData.options.filter(
-        (option) => option.trim() !== ""
-      );
+      cleanedData.options = convertOptionsArrayToObject(formData.options);
     }
 
     onSave(cleanedData);
@@ -93,12 +95,13 @@ export default function QuestionModal({
     }));
   };
 
-  const handleCorrectAnswerChange = (value: string, checked: boolean) => {
+  const handleCorrectAnswerChange = (index: number, checked: boolean) => {
+    const letter = String.fromCharCode(65 + index); // A, B, C, ...
     setFormData((prev) => ({
       ...prev,
-      correct_answers: checked
-        ? [...prev.correct_answers, value]
-        : prev.correct_answers.filter((answer) => answer !== value),
+      answer: checked
+        ? [...prev.answer, letter]
+        : prev.answer.filter((a) => a !== letter),
     }));
   };
 
@@ -113,9 +116,7 @@ export default function QuestionModal({
     setFormData((prev) => ({
       ...prev,
       options: prev.options.filter((_, i) => i !== index),
-      correct_answers: prev.correct_answers.filter(
-        (answer) => answer !== prev.options[index]
-      ),
+      answer: prev.answer.filter((a) => a !== prev.options[index]),
     }));
   };
 
@@ -172,8 +173,8 @@ export default function QuestionModal({
                 Question Text *
               </label>
               <textarea
-                name="question_text"
-                value={formData.question_text}
+                name="content"
+                value={formData.content}
                 onChange={handleChange}
                 required
                 rows={3}
@@ -234,11 +235,12 @@ export default function QuestionModal({
                       <div className="flex items-center">
                         <input
                           type="checkbox"
-                          checked={formData.correct_answers.includes(option)}
+                          checked={formData.answer.includes(
+                            String.fromCharCode(65 + index)
+                          )}
                           onChange={(e) =>
-                            handleCorrectAnswerChange(option, e.target.checked)
+                            handleCorrectAnswerChange(index, e.target.checked)
                           }
-                          className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                         <label className="ml-3 text-sm font-medium text-gray-700">
                           Correct
@@ -318,13 +320,13 @@ export default function QuestionModal({
                     <input
                       type="radio"
                       id="true"
-                      name="correct_answer"
+                      name="answer"
                       value="True"
-                      checked={formData.correct_answers.includes("True")}
+                      checked={formData.answer[0] === "True"}
                       onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          correct_answers: [e.target.value],
+                          answer: [e.target.value],
                         }))
                       }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
@@ -340,13 +342,13 @@ export default function QuestionModal({
                     <input
                       type="radio"
                       id="false"
-                      name="correct_answer"
+                      name="answer"
                       value="False"
-                      checked={formData.correct_answers.includes("False")}
+                      checked={formData.answer[0] === "False"}
                       onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          correct_answers: [e.target.value],
+                          answer: [e.target.value],
                         }))
                       }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
@@ -372,11 +374,11 @@ export default function QuestionModal({
                     : "Sample Answer/Keywords"}
                 </label>
                 <textarea
-                  value={formData.correct_answers.join("\n")}
+                  value={formData.answer.join("\n")}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      correct_answers: e.target.value
+                      answer: e.target.value
                         .split("\n")
                         .filter((answer) => answer.trim() !== ""),
                     }))
@@ -392,23 +394,6 @@ export default function QuestionModal({
                 />
               </div>
             )}
-
-            {/* Points */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Points *
-              </label>
-              <input
-                type="number"
-                name="points"
-                value={formData.points}
-                onChange={handleChange}
-                required
-                min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
 
             {/* Explanation */}
             <div>

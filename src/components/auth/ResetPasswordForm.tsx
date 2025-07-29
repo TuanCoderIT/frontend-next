@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { API } from "@/api/axios";
+import { axiosAPI } from "@/api/axios";
 
 export default function ResetPasswordPage() {
   const params = useSearchParams();
@@ -28,7 +28,7 @@ export default function ResetPasswordPage() {
     }
 
     try {
-      const res = await API.post("/api/reset-password", {
+      const res = await axiosAPI.post("/reset-password", {
         token,
         email,
         password,

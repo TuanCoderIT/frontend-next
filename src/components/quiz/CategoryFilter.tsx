@@ -12,9 +12,9 @@ export default function CategoryFilter({
         {categories.map((category) => (
           <button
             key={category.id} // ✔ key OK
-            onClick={() => onCategoryChange(category.id)} // ✔ truyền id
+            onClick={() => onCategoryChange(String(category.id))} // ✔ truyền id
             className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-              selectedCategory === category.id
+              selectedCategory === String(category.id)
                 ? "bg-blue-50 text-blue-700 border-l-4 border-blue-500"
                 : "text-gray-700 hover:bg-gray-50"
             }`}
@@ -22,7 +22,7 @@ export default function CategoryFilter({
             <div className="flex items-center justify-between">
               <span className="font-medium">{category.name}</span>{" "}
               {/* ✔ hiển thị tên */}
-              {selectedCategory === category.id && (
+              {selectedCategory === String(category.id) && (
                 <svg
                   className="w-4 h-4 text-blue-600"
                   fill="none"

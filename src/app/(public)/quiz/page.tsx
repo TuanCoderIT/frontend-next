@@ -21,6 +21,7 @@ export default function QuizListPage() {
       const data = await getCategories();
       setCategories([{ id: "All", name: "All" }, ...data]);
     };
+
     fetchCategories();
   }, []);
 

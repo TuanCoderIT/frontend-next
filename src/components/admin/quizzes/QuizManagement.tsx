@@ -9,10 +9,11 @@ import FilterSelect from "@/components/admin/common/FilterSelect";
 import ActionButton from "@/components/admin/common/ActionButton";
 import StatusBadge from "@/components/admin/common/StatusBadge";
 import { ClipboardList, NotebookPen, Plus } from "lucide-react";
-import Link from "next/link";
 import CustomLink from "../common/CustomLink";
 import PageHeader from "../common/PageHeader";
 import AdminBreadcrumb from "../common/AdminBreadcrumb";
+import { getQuizzes } from "@/api/quiz";
+import { DataLoading } from "@/components/common/LoadingScreen";
 
 export default function QuizManagement() {
   const router = useRouter();
@@ -23,96 +24,21 @@ export default function QuizManagement() {
 
   // Mock data - Replace with actual API calls
   useEffect(() => {
-    const mockQuizzes: Quiz[] = [
-      {
-        id: 1,
-        title: "JavaScript Fundamentals",
-        description: "Learn the basics of JavaScript programming language",
-        category: "Programming",
-        difficulty: "Beginner",
-        duration: 45,
-        total_questions: 20,
-        learning_objectives: ["Variables", "Functions", "Objects"],
-        prerequisites: ["Basic HTML knowledge"],
-        tags: ["javascript", "programming", "web"],
-        passing_score: 70,
-        max_attempts: 3,
-        status: "published",
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-07-20T14:30:00Z",
-        published_at: "2024-01-20T09:00:00Z",
-        creator_id: 1,
-        creator_name: "John Smith",
-        enrollment_count: 245,
-        completion_rate: 78.5,
-        average_score: 82.3,
-        last_attempt_date: "2024-07-23T15:45:00Z",
-        estimated_time: "",
-        color: "",
-        created_by: 0,
-      },
-      {
-        id: 2,
-        title: "Advanced React Patterns",
-        description: "Master advanced React concepts and design patterns",
-        category: "Programming",
-        difficulty: "Advanced",
-        duration: 90,
-        total_questions: 35,
-        learning_objectives: ["Hooks", "Context", "Performance"],
-        prerequisites: ["React basics", "JavaScript ES6+"],
-        tags: ["react", "javascript", "frontend"],
-        passing_score: 80,
-        max_attempts: 2,
-        status: "published",
-        created_at: "2024-02-10T14:30:00Z",
-        updated_at: "2024-07-18T11:20:00Z",
-        published_at: "2024-02-15T10:00:00Z",
-        creator_id: 2,
-        creator_name: "Jane Doe",
-        enrollment_count: 156,
-        completion_rate: 65.2,
-        average_score: 76.8,
-        last_attempt_date: "2024-07-22T20:15:00Z",
-        estimated_time: "",
-        color: "",
-        created_by: 0,
-      },
-      {
-        id: 3,
-        title: "Database Design Principles",
-        description:
-          "Learn fundamental concepts of database design and normalization",
-        category: "Database",
-        difficulty: "Intermediate",
-        duration: 60,
-        total_questions: 25,
-        learning_objectives: ["Normalization", "Relationships", "Indexing"],
-        prerequisites: ["Basic SQL knowledge"],
-        tags: ["database", "sql", "design"],
-        passing_score: 75,
-        max_attempts: 3,
-        status: "draft",
-        created_at: "2024-03-05T09:15:00Z",
-        updated_at: "2024-07-21T16:45:00Z",
-        published_at: "",
-        creator_id: 3,
-        creator_name: "Mike Johnson",
-        enrollment_count: 0,
-        completion_rate: 0,
-        average_score: 0,
-        last_attempt_date: "",
-        estimated_time: "",
-        color: "",
-        created_by: 0,
-      },
-    ];
+    const fetchQuizzes = async () => {
+      try {
+        // Replace with actual API call
+        const response = await getQuizzes();
+        setQuizzes(response);
+        setFilteredQuizzes(response);
+        console.log(response);
+      } catch (error) {
+        console.error("Failed to fetch quizzes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    setTimeout(() => {
-      setQuizzes(mockQuizzes);
-      setFilteredQuizzes(mockQuizzes);
-      setIsLoading(false);
-    }, 500);
+    fetchQuizzes();
   }, []);
 
   // Filter quizzes based on search and filters
@@ -126,12 +52,16 @@ export default function QuizManagement() {
           quiz.description
             .toLowerCase()
             .includes(filters.search!.toLowerCase()) ||
-          quiz.category.toLowerCase().includes(filters.search!.toLowerCase())
+          quiz.category?.name
+            .toLowerCase()
+            .includes(filters.search!.toLowerCase())
       );
     }
 
     if (filters.category) {
-      filtered = filtered.filter((quiz) => quiz.category === filters.category);
+      filtered = filtered.filter(
+        (quiz) => quiz.category?.name === filters.category
+      );
     }
 
     if (filters.difficulty) {
@@ -170,18 +100,6 @@ export default function QuizManagement() {
       ...prev,
       status: status === "all" ? undefined : status,
     }));
-  };
-
-  const handleCreateQuiz = () => {
-    router.push("/admin/quizzes/add");
-  };
-
-  const handleEditQuiz = (quiz: Quiz) => {
-    router.push(`/admin/quizzes/${quiz.id}/edit`);
-  };
-
-  const handleViewQuiz = (quiz: Quiz) => {
-    router.push(`/admin/quizzes/${quiz.id}`);
   };
 
   const handleDeleteQuiz = (quiz: Quiz) => {
@@ -223,34 +141,7 @@ export default function QuizManagement() {
   };
 
   if (isLoading) {
-    return (
-      <div className="p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="flex items-center space-x-2">
-            <svg
-              className="w-6 h-6 animate-spin text-blue-600"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span className="text-gray-600">Loading quizzes...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <DataLoading text="Loading the Quizzes List..." />;
   }
 
   return (
@@ -349,14 +240,14 @@ export default function QuizManagement() {
                           {quiz.description}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                          by {quiz.creator_name} • {quiz.duration} min
+                          Time limit: {quiz.duration} min
                         </p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-gray-800">
-                      {quiz.category}
+                      {quiz.category?.name}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -365,9 +256,9 @@ export default function QuizManagement() {
                   <td className="px-6 py-4">
                     <StatusBadge status={quiz.status} />
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {quiz.total_questions}
+                  <td className="px-6 py-4 text-center">
+                    <div className="text-sm text-fuchsia-700">
+                      {quiz.questions_count}
                     </div>
                     <div className="text-xs text-gray-500">questions</div>
                   </td>

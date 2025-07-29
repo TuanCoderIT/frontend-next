@@ -5,7 +5,6 @@ import { useRouter } from "@lexz451/next-nprogress";
 import { ArrowLeft, CircleUserRound } from "lucide-react";
 import PageHeader from "@/components/admin/common/PageHeader";
 import UserForm from "@/components/admin/users/UserForm";
-import { axiosAPI } from "@/api/axios";
 import AdminBreadcrumb from "@/components/admin/common/AdminBreadcrumb";
 import { saveUser } from "@/api/users";
 

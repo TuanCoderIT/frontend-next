@@ -1,10 +1,13 @@
 // src/lib/types/category.ts
 export interface Category {
-  id: string | number;
+  id: number | string; // Sử dụng number hoặc string tùy theo API
   name: string;
+  slug?: string;
+  color?: string;
+  is_active?: boolean;
 }
 export interface CategoryFilterProps {
   categories: Category[];
   selectedCategory: string | number;
-  onCategoryChange: (category: string | number) => void;
+  onCategoryChange: (id: string | number) => void;
 }

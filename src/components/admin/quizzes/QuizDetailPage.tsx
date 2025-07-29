@@ -12,7 +12,6 @@ export default function QuizDetailPage() {
   const params = useParams();
   const router = useRouter();
   const quizId = parseInt(params.id as string);
-
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeTab, setActiveTab] = useState<"info" | "questions">("info");
@@ -23,80 +22,29 @@ export default function QuizDetailPage() {
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
-  // Mock data - Replace with actual API calls
   useEffect(() => {
     const mockQuiz: Quiz = {
       id: quizId,
-      title: "JavaScript Fundamentals",
-      description:
-        "Master the core concepts of JavaScript programming language including variables, functions, and control structures.",
-      category: "Programming",
+      title: "JavaScript Basics",
+      description: "Test your knowledge of JavaScript fundamentals.",
+      category: { id: 1, name: "Programming" },
       difficulty: "Beginner",
       duration: 30,
-      total_questions: 20,
-      learning_objectives: [
-        "Understand JavaScript syntax and basic concepts",
-        "Work with variables and data types",
-        "Master functions and scope",
-      ],
-      prerequisites: [
-        "Basic HTML knowledge",
-        "Understanding of programming concepts",
-      ],
-      tags: ["JavaScript", "Programming", "Web Development"],
+      questions_count: 10,
+      learning_objectives: ["Understand variables", "Learn functions"],
+      prerequisites: ["Basic HTML", "Basic CSS"],
+      tags: ["JavaScript", "Programming", "Basics"],
       passing_score: 70,
       max_attempts: 3,
-      estimated_time: "25-30 minutes",
       color: "#3B82F6",
       status: "published",
-      created_at: "2024-01-15T10:00:00Z",
+      created_at: "2024-01-01T12:00:00Z",
       updated_at: "2024-07-20T14:30:00Z",
-      created_by: 1,
-      creator_id: 0,
-      creator_name: "",
-      enrollment_count: 0,
-      completion_rate: 0,
-      average_score: 0,
+      enrollment_count: 100,
+      last_attempt_date: "2024-07-19T10:00:00Z",
     };
 
-    const mockQuestions: Question[] = [
-      {
-        id: 1,
-        quiz_id: quizId,
-        question_text:
-          "What is the correct way to declare a variable in JavaScript?",
-        type: "multiple_choice",
-        options: [
-          "var myVar;",
-          "variable myVar;",
-          "v myVar;",
-          "declare myVar;",
-        ],
-        correct_answers: ["var myVar;"],
-        explanation:
-          "In JavaScript, variables are declared using 'var', 'let', or 'const' keywords.",
-        points: 1,
-        order: 1,
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-07-20T14:30:00Z",
-        order_index: 0,
-      },
-      {
-        id: 2,
-        quiz_id: quizId,
-        question_text: "Which of the following are JavaScript data types?",
-        type: "multiple_choice",
-        options: ["String", "Number", "Boolean", "All of the above"],
-        correct_answers: ["All of the above"],
-        explanation:
-          "JavaScript has several primitive data types including String, Number, Boolean, Undefined, Null, and Symbol.",
-        points: 2,
-        order: 2,
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-07-20T14:30:00Z",
-        order_index: 0,
-      },
-    ];
+    const mockQuestions: Question[] = [];
 
     setQuiz(mockQuiz);
     setQuestions(mockQuestions);
@@ -175,11 +123,11 @@ export default function QuizDetailPage() {
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <span className="text-white/80 text-sm font-medium">
-              {quiz.category}
+              {quiz.category.name}
             </span>
             <div className="flex items-center space-x-4 text-white/90 text-sm">
               <span>{quiz.duration} min</span>
-              <span>{quiz.total_questions} questions</span>
+              <span>{quiz.questions_count} questions</span>
               <span>{quiz.passing_score}% to pass</span>
             </div>
           </div>
@@ -230,7 +178,7 @@ export default function QuizDetailPage() {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="text-sm text-gray-500 mb-1">Questions</div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {quiz.total_questions}
+                    {quiz.questions_count}
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">

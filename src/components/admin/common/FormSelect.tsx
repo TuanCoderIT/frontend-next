@@ -33,7 +33,7 @@ export default function FormSelect({
         name={name}
         value={value}
         onChange={onChange}
-        className={`block w-full rounded-md border ${
+        className={`block w-full rounded-lg shadow-sm border ${
           error ? "border-red-300" : "border-gray-300"
         } bg-white py-2.5 px-3 text-gray-900 focus:border-blue-500 focus:ring-blue-500 sm:text-sm`}
       >

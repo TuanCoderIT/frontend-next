@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { API } from "@/api/axios";
+import { axiosAPI } from "@/api/axios";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await API.post("/api/forgot-password", { email });
+      const res = await axiosAPI.post("/forgot-password", { email });
       setMessage(res.data.message);
     } catch (error: any) {
       setMessage(error.response?.data?.message || "Có lỗi xảy ra.");

@@ -7,22 +7,25 @@ import { formatDate } from "@/utils/admin";
 import StatusBadge from "@/components/admin/common/StatusBadge";
 import ActionButton from "@/components/admin/common/ActionButton";
 import QuestionModal from "@/components/admin/quizzes/QuestionModal";
-import Link from "next/link";
+import { ArrowLeft, BookCheck, CircleQuestionMark, Plus } from "lucide-react";
+import { getQuizById } from "@/api/quiz";
+import { PageLoading } from "@/components/common/LoadingScreen";
+import PageHeader from "@/components/admin/common/PageHeader";
+import AdminBreadcrumb from "@/components/admin/common/AdminBreadcrumb";
 import {
-  ArrowLeftFromLine,
-  CircleUserRound,
-  NotebookPen,
-  Plus,
-  SquareChevronLeft,
-  SquarePen,
-} from "lucide-react";
-import BackButton from "@/components/admin/common/BackButton";
+  createQuestion,
+  deleteQuestion,
+  updateQuestion,
+} from "@/api/questions";
+import { mapOptions } from "@/utils/questionUtils";
 
 export default function QuizDetailPage() {
   const router = useRouter();
   const params = useParams();
   const quizId = params.id as string;
-
+  const { id } = useParams(); // Next.js trả về chuỗi
+  const [existingQuizData, setExistingQuizData] = useState<any>(null);
+  const [error, setError] = useState(null);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,118 +38,24 @@ export default function QuizDetailPage() {
   );
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
-  // Mock data - Replace with actual API calls
   useEffect(() => {
-    const loadQuizData = async () => {
+    const fetchQuiz = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Mock quiz data
-        const mockQuiz: Quiz = {
-          id: parseInt(quizId),
-          title: "JavaScript Fundamentals",
-          description:
-            "Learn the basics of JavaScript programming language including variables, functions, objects, and more. This comprehensive quiz will test your understanding of core JavaScript concepts.",
-          category: "Programming",
-          difficulty: "Beginner",
-          duration: 45,
-          total_questions: 15,
-          learning_objectives: [
-            "Understand JavaScript variables and data types",
-            "Master function declarations and expressions",
-            "Work with objects and arrays effectively",
-          ],
-          prerequisites: [
-            "Basic HTML knowledge",
-            "Understanding of programming concepts",
-          ],
-          tags: ["javascript", "programming", "web"],
-          passing_score: 70,
-          max_attempts: 3,
-          estimated_time: "45 minutes",
-          color: "blue",
-          status: "published",
-          created_at: "2024-01-15T10:00:00Z",
-          updated_at: "2024-07-20T14:30:00Z",
-          published_at: "2024-01-20T09:00:00Z",
-          created_by: 1,
-          creator_id: 1,
-          creator_name: "John Smith",
-          enrollment_count: 245,
-          completion_rate: 78.5,
-          average_score: 82.3,
-          last_attempt_date: "2024-07-23T15:45:00Z",
-        };
-
-        // Mock questions data
-        const mockQuestions: Question[] = [
-          {
-            id: 1,
-            quiz_id: parseInt(quizId),
-            question_text:
-              "What is the correct way to declare a variable in JavaScript?",
-            type: "multiple_choice",
-            options: [
-              "var x = 5;",
-              "variable x = 5;",
-              "v x = 5;",
-              "declare x = 5;",
-            ],
-            correct_answers: ["var x = 5;"],
-            explanation:
-              "In JavaScript, variables are declared using 'var', 'let', or 'const' keywords.",
-            points: 2,
-            order_index: 1,
-            order: 0,
-            created_at: "",
-            updated_at: "",
-          },
-          {
-            id: 2,
-            quiz_id: parseInt(quizId),
-            question_text: "JavaScript is a compiled language.",
-            type: "true_false",
-            options: ["True", "False"],
-            correct_answers: ["False"],
-            explanation:
-              "JavaScript is an interpreted language, not a compiled language.",
-            points: 1,
-            order_index: 2,
-            order: 0,
-            created_at: "",
-            updated_at: "",
-          },
-          {
-            id: 3,
-            quiz_id: parseInt(quizId),
-            question_text:
-              "What does the 'typeof' operator return for an array?",
-            type: "short_answer",
-            options: [],
-            correct_answers: ["object"],
-            explanation:
-              "In JavaScript, arrays are actually objects, so typeof returns 'object'.",
-            points: 3,
-            order_index: 3,
-            order: 0,
-            created_at: "",
-            updated_at: "",
-          },
-        ];
-
-        setQuiz(mockQuiz);
-        setQuestions(mockQuestions);
-      } catch (error) {
-        console.error("Error loading quiz data:", error);
-      } finally {
+        const data = await getQuizById(Number(id));
+        setExistingQuizData(data);
+        setQuiz(data);
+        setQuestions(data.questions || []);
+        setIsLoading(false);
+      } catch (err) {
+        console.error(err);
         setIsLoading(false);
       }
     };
+    if (id) fetchQuiz();
+  }, [id]);
 
-    if (quizId) {
-      loadQuizData();
-    }
-  }, [quizId]);
+  if (!existingQuizData)
+    return <PageLoading text="Loading Quiz Information..." />;
 
   const handleCreateQuestion = () => {
     setSelectedQuestion(null);
@@ -160,37 +69,38 @@ export default function QuizDetailPage() {
     setIsQuestionModalOpen(true);
   };
 
-  const handleDeleteQuestion = (question: Question) => {
-    if (window.confirm(`Are you sure you want to delete this question?`)) {
-      setQuestions((prev) => prev.filter((q) => q.id !== question.id));
+  const handleDeleteQuestion = async (question: Question) => {
+    if (window.confirm("Are you sure you want to delete this question?")) {
+      try {
+        await deleteQuestion(question.id);
+        setQuestions((prev) => prev.filter((q) => q.id !== question.id));
+      } catch (error) {
+        console.error("Xoá thất bại:", error);
+      }
     }
   };
 
-  const handleSaveQuestion = (questionData: Partial<Question>) => {
-    if (modalMode === "create") {
-      const newQuestion: Question = {
-        id: Math.max(...questions.map((q) => q.id), 0) + 1,
-        quiz_id: parseInt(quizId),
-        question_text: questionData.question_text || "",
-        type: questionData.type || "multiple_choice",
-        options: questionData.options || [],
-        correct_answers: questionData.correct_answers || [],
-        explanation: questionData.explanation || "",
-        points: questionData.points || 1,
-        order_index: questions.length + 1,
-        order: 0,
-        created_at: "",
-        updated_at: "",
+  const handleSaveQuestion = async (questionData: Partial<Question>) => {
+    try {
+      const payload = {
+        ...questionData,
+        exam_id: parseInt(quizId), // Thêm exam_id tại đây
       };
-      setQuestions((prev) => [...prev, newQuestion]);
-    } else if (selectedQuestion) {
-      setQuestions((prev) =>
-        prev.map((q) =>
-          q.id === selectedQuestion.id ? { ...q, ...questionData } : q
-        )
-      );
+      if (modalMode === "create") {
+        const created = await createQuestion(payload);
+        setQuestions((prev) => [...prev, created]); // cập nhật state sau khi tạo
+      } else if (modalMode === "edit" && selectedQuestion) {
+        const updated = await updateQuestion(selectedQuestion.id, questionData);
+        setQuestions((prev) =>
+          prev.map((q) => (q.id === selectedQuestion.id ? updated : q))
+        );
+      }
+
+      setIsQuestionModalOpen(false);
+    } catch (error) {
+      console.error("Lỗi khi lưu câu hỏi:", error);
+      // TODO: hiển thị lỗi ra UI nếu cần
     }
-    setIsQuestionModalOpen(false);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -222,34 +132,7 @@ export default function QuizDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="flex items-center space-x-2">
-            <svg
-              className="w-6 h-6 animate-spin text-blue-600"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span className="text-gray-600">Loading quiz details...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <PageLoading text="Loading Quiz Details..." />;
   }
 
   if (!quiz) {
@@ -273,47 +156,21 @@ export default function QuizDetailPage() {
 
   return (
     <div className="px-4 space-y-6">
+      <AdminBreadcrumb
+        currentPage="Quiz Details"
+        parent={{ href: "/admin/quizzes", label: "Quizzes" }}
+      />
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="flex-1">
-            <BackButton />
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl shadow-md">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg shadow-sm">
-                      <NotebookPen className="h-6 w-6 text-white" />
-                    </div>
-                    <h1 className="text-2xl font-semibold ml-2 text-gray-800">
-                      {quiz.title}
-                    </h1>
-                  </div>
-                  <div className="flex items-center space-x-4 mt-2">
-                    <StatusBadge status={quiz.status} />
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getDifficultyColor(
-                        quiz.difficulty
-                      )}`}
-                    >
-                      {quiz.difficulty}
-                    </span>
-                    <span className="text-gray-500">
-                      by {quiz.creator_name}
-                    </span>
-                  </div>
-                </div>
-                <Link
-                  href={`/admin/quizzes/${quiz.id}/edit`}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 transform transition hover:-translate-y-0.5 hover:shadow-lg"
-                >
-                  <SquarePen className="h-5 w-5" />
-                  Edit Quiz
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          title={quiz.title}
+          icon={<BookCheck />}
+          actionLabel="Back to Quizzes"
+          actionHref="/admin/quizzes"
+          actionIcon={<ArrowLeft />}
+          bgGradient="from-green-50 to-emerald-50"
+          buttonGradient="from-green-500 to-emerald-600"
+        />
 
         {/* Tabs */}
         <div className="border-b border-gray-200">
@@ -348,8 +205,8 @@ export default function QuizDetailPage() {
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Description */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-2xl border shadow-md border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-indigo-700 mb-4">
                 Description
               </h2>
               <p className="text-gray-700 leading-relaxed">
@@ -358,8 +215,8 @@ export default function QuizDetailPage() {
             </div>
 
             {/* Learning Objectives */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-2xl border shadow-md border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-indigo-700 mb-4">
                 Learning Objectives
               </h2>
               <ul className="space-y-2">
@@ -373,8 +230,8 @@ export default function QuizDetailPage() {
             </div>
 
             {/* Prerequisites */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-2xl border shadow-md border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-indigo-700 mb-4">
                 Prerequisites
               </h2>
               <ul className="space-y-2">
@@ -392,7 +249,7 @@ export default function QuizDetailPage() {
           <div className="space-y-6">
             {/* Quick Stats */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-indigo-700 mb-4">
                 Quick Stats
               </h2>
               <div className="space-y-4">
@@ -416,20 +273,33 @@ export default function QuizDetailPage() {
                   <span className="text-gray-600">Enrollments</span>
                   <span className="font-medium">{quiz.enrollment_count}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Completion Rate</span>
-                  <span className="font-medium">{quiz.completion_rate}%</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Average Score</span>
-                  <span className="font-medium">{quiz.average_score}%</span>
-                </div>
+              </div>
+            </div>
+            {/* Options */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-indigo-700 mb-4">
+                Options
+              </h2>
+              <div className="flex items-center space-x-4 mt-2">
+                <StatusBadge status={quiz.status} />
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getDifficultyColor(
+                    quiz.difficulty
+                  )}`}
+                >
+                  {quiz.difficulty}
+                </span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-cyan-200 text-black">
+                  {questions.length} Questions
+                </span>
               </div>
             </div>
 
             {/* Tags */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tags</h2>
+              <h2 className="text-lg font-semibold text-indigo-700 mb-4">
+                Tags
+              </h2>
               <div className="flex flex-wrap gap-2">
                 {quiz.tags.map((tag, index) => (
                   <span
@@ -444,7 +314,7 @@ export default function QuizDetailPage() {
 
             {/* Metadata */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-indigo-700 mb-4">
                 Metadata
               </h2>
               <div className="space-y-3 text-sm">
@@ -460,14 +330,14 @@ export default function QuizDetailPage() {
                     {formatDate(quiz.updated_at)}
                   </span>
                 </div>
-                {quiz.published_at && (
+                {/* {quiz.published_at && (
                   <div>
                     <span className="text-gray-600">Published:</span>
                     <span className="ml-2 text-gray-900">
                       {formatDate(quiz.published_at)}
                     </span>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -484,21 +354,7 @@ export default function QuizDetailPage() {
             <ActionButton
               variant="primary"
               onClick={handleCreateQuestion}
-              icon={
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-              }
+              icon={<Plus />}
             >
               Add Question
             </ActionButton>
@@ -508,48 +364,13 @@ export default function QuizDetailPage() {
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             {questions.length === 0 ? (
               <div className="text-center py-12">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <CircleQuestionMark className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">
                   No questions yet
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Get started by creating your first question.
                 </p>
-                <div className="mt-6">
-                  <ActionButton
-                    variant="primary"
-                    onClick={handleCreateQuestion}
-                    icon={
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
-                    }
-                  >
-                    Add First Question
-                  </ActionButton>
-                </div>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
@@ -573,37 +394,83 @@ export default function QuizDetailPage() {
                           </span>
                         </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">
-                          {question.question_text}
+                          {question.content || "No question text provided"}
                         </h3>
+                        {/* Hiển thị đáp án đúng cho từng loại câu hỏi */}
                         {question.type === "multiple_choice" &&
                           question.options && (
                             <div className="mt-3">
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {question.options.map((option, optionIndex) => (
-                                  <div
-                                    key={optionIndex}
-                                    className={`p-2 text-sm rounded-lg border ${
-                                      question.correct_answers.includes(option)
-                                        ? "bg-green-50 border-green-200 text-green-800"
-                                        : "bg-gray-50 border-gray-200 text-gray-700"
-                                    }`}
-                                  >
-                                    <span className="font-medium">
-                                      {String.fromCharCode(65 + optionIndex)}.
-                                    </span>{" "}
-                                    {option}
-                                    {question.correct_answers.includes(
-                                      option
-                                    ) && (
-                                      <span className="ml-2 text-green-600">
-                                        ✓
-                                      </span>
-                                    )}
-                                  </div>
-                                ))}
+                                {Object.entries(
+                                  mapOptions(Object.values(question.options))
+                                ).map(([key, value]) => {
+                                  const isCorrect = Array.isArray(
+                                    question.answer
+                                  )
+                                    ? question.answer.includes(key) ||
+                                      question.answer.includes(value)
+                                    : question.answer === key ||
+                                      question.answer === value;
+                                  return (
+                                    <div
+                                      key={key}
+                                      className={`p-2 text-sm rounded-lg border ${
+                                        isCorrect
+                                          ? "bg-green-50 border-green-200 text-green-800"
+                                          : "bg-gray-50 border-gray-200 text-gray-700"
+                                      }`}
+                                    >
+                                      <span className="font-medium">
+                                        {key}.
+                                      </span>{" "}
+                                      {value}
+                                      {isCorrect && (
+                                        <span className="ml-2 text-green-600 font-bold">
+                                          ✓
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
+                        {question.type === "true_false" && (
+                          <div className="mt-3">
+                            <span className="inline-block px-3 py-1 rounded-full bg-green-50 text-green-800 border border-green-200 text-sm font-medium">
+                              Đáp án đúng:{" "}
+                              <span className="font-semibold">
+                                {!Array.isArray(question.answer) &&
+                                (question.answer === true ||
+                                  question.answer === "True")
+                                  ? "Đúng"
+                                  : "Sai"}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                        {question.type === "short_answer" && (
+                          <div className="mt-3">
+                            <span className="inline-block px-3 py-1 rounded-full bg-green-50 text-green-800 border border-green-200 text-sm font-medium">
+                              Đáp án đúng:{" "}
+                              <span className="font-semibold">
+                                {Array.isArray(question.answer)
+                                  ? question.answer.join(", ")
+                                  : question.answer}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                        {question.type === "essay" && question.answer && (
+                          <div className="mt-3">
+                            <span className="inline-block px-3 py-1 rounded-full bg-green-50 text-green-800 border border-green-200 text-sm font-medium">
+                              Đáp án mẫu:{" "}
+                              <span className="font-semibold">
+                                {question.answer}
+                              </span>
+                            </span>
+                          </div>
+                        )}
                         {question.explanation && (
                           <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                             <p className="text-sm text-blue-800">

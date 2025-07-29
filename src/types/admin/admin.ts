@@ -19,43 +19,39 @@ export interface Quiz {
   id: number;
   title: string;
   description: string;
-  category: string;
+  category: {
+    id: number;
+    name: string;
+  };
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   duration: number; // in minutes
-  total_questions: number;
+  questions_count: number;
   learning_objectives: string[];
   prerequisites: string[];
   tags: string[];
   passing_score: number;
   max_attempts: number;
-  estimated_time: string;
   color: string;
   status: 'draft' | 'published' | 'archived';
   created_at: string;
   updated_at: string;
-  published_at?: string;
-  created_by: number;
-  creator_id: number;
-  creator_name: string;
   enrollment_count: number;
-  completion_rate: number;
-  average_score: number;
   last_attempt_date?: string;
 }
 
 export interface Question {
   id: number;
   quiz_id: number;
-  question_text: string;
+  content: string;
   type: 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
-  options?: string[];
-  correct_answers: string[];
+  options?: Record<string, string>;
+  // options?: string[];
+  answer: string[];
   explanation?: string;
   points: number;
   order: number;
   created_at: string;
   updated_at: string;
-  order_index: number;
 }
 
 export interface UserFilters {

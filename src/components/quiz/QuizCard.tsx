@@ -1,10 +1,11 @@
+import { Category } from "@/types/public/category";
 import Link from "next/link";
 
 interface Quiz {
   id: number;
   title: string;
   description: string;
-  category: string;
+  category: Category;
   difficulty: string;
   questions: number;
   duration: number;
@@ -32,6 +33,7 @@ const difficultyColors = {
 };
 
 export default function QuizCard({ quiz }: QuizCardProps) {
+  const isHexColor = quiz.color;
   const colorClass = colorClasses[quiz.color as keyof typeof colorClasses];
   const difficultyClass =
     difficultyColors[quiz.difficulty as keyof typeof difficultyColors];
@@ -39,7 +41,19 @@ export default function QuizCard({ quiz }: QuizCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
       {/* Header with gradient */}
-      <div className={`h-32 bg-gradient-to-r ${colorClass} relative`}>
+      <div
+        className={`h-32 ${
+          !isHexColor ? `bg-gradient-to-r ${colorClass}` : ""
+        } relative`}
+        style={
+          isHexColor
+            ? {
+                background: `linear-gradient(90deg, ${quiz.color}, ${quiz.color}90)`,
+              }
+            : undefined
+        }
+      >
+        {/* <div className={`h-32 bg-gradient-to-r ${colorClass} relative`}> */}
         <div className="absolute top-4 left-4">
           <span
             className={`px-3 py-1 rounded-full text-xs font-semibold ${difficultyClass}`}
@@ -49,7 +63,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
         </div>
         <div className="absolute bottom-4 left-4 text-white">
           <h3 className="text-xl font-bold mb-1">{quiz.title}</h3>
-          <span className="text-sm opacity-90">{quiz.category}</span>
+          <span className="text-sm opacity-90">{quiz.category.name}</span>
         </div>
       </div>
 

@@ -16,6 +16,7 @@ import PageHeader from "../common/PageHeader";
 import AdminBreadcrumb from "../common/AdminBreadcrumb";
 import { axiosAPI } from "@/api/axios";
 import { deleteUser } from "@/api/users";
+import { DataLoading } from "@/components/common/LoadingScreen";
 
 export default function UserManagement() {
   const router = useRouter();
@@ -122,11 +123,7 @@ export default function UserManagement() {
   ];
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <DataLoading text="Loading Users List..." />;
   }
 
   return (

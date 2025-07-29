@@ -25,7 +25,7 @@ export default function FormTextarea({
         </label>
       )}
       <div
-        className={`flex rounded-md shadow-sm border ${
+        className={`flex rounded-lg shadow-sm border ${
           error ? "border-red-300 ring-1 ring-red-300" : "border-gray-300"
         } focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500`}
       >

@@ -8,6 +8,7 @@ import QuizProgress from "@/components/quiz/QuizProgress";
 import QuestionCard from "@/components/quiz/QuestionCard";
 import QuizNavigation from "@/components/quiz/QuizNavigation";
 import { getQuizById, submitQuizResult } from "@/api/quiz";
+import { DataLoading } from "@/components/common/LoadingScreen";
 
 export default function QuizStartPage() {
   const router = useRouter();
@@ -158,11 +159,7 @@ export default function QuizStartPage() {
   const progress = (answered / (quizData?.questions.length || 1)) * 100;
 
   if (isLoading || !quizData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Loading quiz...</div>
-      </div>
-    );
+    return <DataLoading text="Loading quiz data..." />;
   }
 
   return (
