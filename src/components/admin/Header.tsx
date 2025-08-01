@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -10,11 +10,13 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminHeader() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-white shadow-sm z-20">
@@ -103,15 +105,25 @@ export default function AdminHeader() {
           {/* User profile */}
           <div className="relative inline-block">
             <button className="flex items-center space-x-3">
-              <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-                A
-              </div>
-              <div className="hidden md:block text-left">
-                <h3 className="text-sm font-medium text-gray-700">
-                  Admin User
-                </h3>
-                <p className="text-xs text-gray-500">Quản trị viên</p>
-              </div>
+              {user ? (
+                <>
+                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="User Avatar" className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      <span className="text-white text-sm font-medium">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <Link href={'/admin/profile'} className="text-sm font-medium text-gray-700">
+                      {user?.name}
+                    </Link>
+                    <p className="text-xs text-gray-500">Quản trị viên</p>
+                  </div>
+                </>
+              ) : ("")}
             </button>
           </div>
 

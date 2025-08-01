@@ -5,7 +5,7 @@ import { getInitials, generateAvatarColor } from "@/utils/admin";
 interface AvatarProps {
   src?: string;
   name: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
   className?: string;
 }
 
@@ -20,6 +20,10 @@ export default function Avatar({
     md: "w-10 h-10 text-sm",
     lg: "w-12 h-12 text-base",
     xl: "w-16 h-16 text-lg",
+    "2xl": "w-20 h-20 text-xl",
+    "3xl": "w-24 h-24 text-2xl",
+    "4xl": "w-28 h-28 text-3xl",
+    "5xl": "w-32 h-32 text-4xl",
   };
 
   const avatarColor = generateAvatarColor(name);

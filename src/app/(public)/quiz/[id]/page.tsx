@@ -7,6 +7,10 @@ import { QuizInfo } from "@/types/public/exams";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import { getQuizById } from "@/api/quiz";
 import { notify } from "@/utils/toast";
+import RatingSection from "@/components/public/RatingSection";
+import { RatingStats } from "@/types/public/rating";
+import RatingForm from "@/components/public/RatingForm";
+import RatingList from "@/components/public/RatingList";
 
 export default function QuizDetailPage() {
   const router = useRouter();
@@ -14,6 +18,7 @@ export default function QuizDetailPage() {
   const id = params.id;
   const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [ratingStats, setRatingStats] = useState<RatingStats | undefined>(undefined);
 
   useEffect(() => {
     const fetchQuizInfo = async () => {
@@ -107,7 +112,7 @@ export default function QuizDetailPage() {
         {/* Breadcrumb */}
         <Breadcrumbs lastItemLabel={quizInfo.title} />
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-5">
           {/* Left Column - Quiz Details */}
           <div className="lg:col-span-2 space-y-8">
             {/* Header */}
@@ -218,7 +223,7 @@ export default function QuizDetailPage() {
                 <div className="flex items-center justify-between py-2 border-b border-gray-100">
                   <span className="text-gray-600 font-medium">Questions:</span>
                   <span className="text-xl font-bold text-gray-900">
-                    {quizInfo.total_questions}
+                    {quizInfo.questions_count}
                   </span>
                 </div>
 
@@ -270,11 +275,10 @@ export default function QuizDetailPage() {
               <button
                 onClick={handleStartQuiz}
                 disabled={quizInfo.attempts >= quizInfo.max_attempts}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                  quizInfo.attempts >= quizInfo.max_attempts
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
-                }`}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${quizInfo.attempts >= quizInfo.max_attempts
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+                  }`}
               >
                 {quizInfo.attempts >= quizInfo.max_attempts
                   ? "Max Attempts Reached"
@@ -317,6 +321,8 @@ export default function QuizDetailPage() {
             </div>
           </div>
         </div>
+        {/* Ratings section */}
+        <RatingSection type="quiz" id={quizInfo.id} />
       </div>
     </div>
   );

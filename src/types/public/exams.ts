@@ -20,7 +20,7 @@ export interface QuizInfo {
   learning_objectives: string[];
   prerequisites: string[];
   tags: string[];
-  total_questions: number;
+  questions_count: number;
   duration: number;
   difficulty: string;
   passing_score: number;

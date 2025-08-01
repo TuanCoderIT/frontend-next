@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
-
+import { useRouter } from "next/navigation";
 export default function Navbar() {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -29,6 +30,8 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await logout();
+      localStorage.removeItem("token");
+      router.push("/");
       setIsDropdownOpen(false);
     } catch (error) {
       console.error("Logout failed:", error);
@@ -36,7 +39,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white/30 border-b border-gray-200 backdrop-blur-md transition-all sticky top-0 z-50">
       <div className="max-w-screen-xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -90,16 +93,19 @@ export default function Navbar() {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
+                  <div className="w-11 h-11 bg-blue-600 rounded-full flex items-center justify-center">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="User Avatar" className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      <span className="text-white text-sm font-medium">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <span className="font-medium">{user.name}</span>
                   <svg
-                    className={`w-4 h-4 transition-transform ${
-                      isDropdownOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -115,7 +121,7 @@ export default function Navbar() {
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
                     <Link
                       href="/account"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"

@@ -42,14 +42,13 @@ export default function QuizCard({ quiz }: QuizCardProps) {
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
       {/* Header with gradient */}
       <div
-        className={`h-32 ${
-          !isHexColor ? `bg-gradient-to-r ${colorClass}` : ""
-        } relative`}
+        className={`h-32 ${!isHexColor ? `bg-gradient-to-r ${colorClass}` : ""
+          } relative`}
         style={
           isHexColor
             ? {
-                background: `linear-gradient(90deg, ${quiz.color}, ${quiz.color}90)`,
-              }
+              background: `linear-gradient(90deg, ${quiz.color}, ${quiz.color})`,
+            }
             : undefined
         }
       >
