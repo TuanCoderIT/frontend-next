@@ -130,11 +130,18 @@ export default function Navbar() {
                       My Account
                     </Link>
                     <Link
-                      href="/quiz"
+                      href="/purchases"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      My Quizzes
+                      My Purchases
+                    </Link>
+                    <Link
+                      href="/wallet"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      My Wallet
                     </Link>
                     <hr className="my-2" />
                     <button

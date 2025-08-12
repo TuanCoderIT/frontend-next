@@ -9,8 +9,7 @@ import { getQuizById } from "@/api/quiz";
 import { notify } from "@/utils/toast";
 import RatingSection from "@/components/public/RatingSection";
 import { RatingStats } from "@/types/public/rating";
-import RatingForm from "@/components/public/RatingForm";
-import RatingList from "@/components/public/RatingList";
+import { checkPurchase, purchaseItem } from "@/api/purchase";
 
 export default function QuizDetailPage() {
   const router = useRouter();
@@ -18,21 +17,30 @@ export default function QuizDetailPage() {
   const id = params.id;
   const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [purchased, setPurchased] = useState(false);
   const [ratingStats, setRatingStats] = useState<RatingStats | undefined>(undefined);
 
   useEffect(() => {
-    const fetchQuizInfo = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
+        // 1. Lấy thông tin quiz
         const data = await getQuizById(Number(id));
         setQuizInfo(data);
+        // 2. Nếu quiz có giá > 0, check purchase
+        if (data.price_token > 0) {
+          const res = await checkPurchase("quiz", data.id);
+          setPurchased(res.purchased);
+        }
       } catch (error) {
         console.error(error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchQuizInfo();
+    if (id) {
+      fetchData();
+    }
   }, [id]);
 
   if (isLoading || !quizInfo) {
@@ -46,13 +54,36 @@ export default function QuizDetailPage() {
     );
   }
 
-  const handleStartQuiz = () => {
+  const handleStartQuiz = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       notify.error("You must be logged in to start the quiz.");
       router.push("/auth/login?redirect=/quiz/" + quizInfo.id + "/start");
-    } else {
+      return;
+    }
+
+    // Nếu miễn phí hoặc đã mua
+    if (quizInfo.price_token === 0 || purchased) {
       router.push(`/quiz/${quizInfo.id}/start`);
+      return;
+    }
+
+    // Nếu chưa mua → tiến hành mua
+    try {
+      setIsLoading(true);
+      const res = await purchaseItem("quiz", quizInfo.id);
+      notify.success(res.message || "Purchase successful");
+      setPurchased(true);
+      router.push(`/quiz/${quizInfo.id}/start`);
+    } catch (err: any) {
+      if (err.response?.status === 400) {
+        notify.error("Insufficient tokens. Please top up.");
+        router.push("/wallet/top-up");
+      } else {
+        notify.error(err.response?.data?.message || "Purchase failed");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -199,7 +230,7 @@ export default function QuizDetailPage() {
                 Topics Covered
               </h2>
               <div className="flex flex-wrap gap-3">
-                {quizInfo.tags.map((tag, index) => (
+                {(quizInfo?.tags ?? []).map((tag, index) => (
                   <span
                     key={index}
                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium"
@@ -274,15 +305,21 @@ export default function QuizDetailPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <button
                 onClick={handleStartQuiz}
-                disabled={quizInfo.attempts >= quizInfo.max_attempts}
+                disabled={isLoading || quizInfo.attempts >= quizInfo.max_attempts}
                 className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${quizInfo.attempts >= quizInfo.max_attempts
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
                   }`}
               >
-                {quizInfo.attempts >= quizInfo.max_attempts
-                  ? "Max Attempts Reached"
-                  : "Start Quiz"}
+                {isLoading
+                  ? "Processing..."
+                  : quizInfo.attempts >= quizInfo.max_attempts
+                    ? "Max Attempts Reached"
+                    : quizInfo.price_token > 0
+                      ? purchased
+                        ? "Start Quiz"
+                        : `Buy & Start - ${quizInfo.price_token} tokens`
+                      : "Start Quiz - Free"}
               </button>
 
               {quizInfo.attempts < quizInfo.max_attempts && (
@@ -293,6 +330,29 @@ export default function QuizDetailPage() {
                 </p>
               )}
             </div>
+            {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <button
+                onClick={handleStartQuiz}
+                disabled={quizInfo.attempts >= quizInfo.max_attempts}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${quizInfo.attempts >= quizInfo.max_attempts
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+                  }`}
+              >
+                {quizInfo.attempts >= quizInfo.max_attempts
+                  ? "Max Attempts Reached"
+                  : quizInfo.price_token > 0
+                    ? `Start Quiz - ${quizInfo.price_token} tokens`
+                    : "Start Quiz - Free"}
+              </button>
+              {quizInfo.attempts < quizInfo.max_attempts && (
+                <p className="text-center text-sm text-gray-500 mt-3">
+                  You have{" "}
+                  <strong>{quizInfo.max_attempts - quizInfo.attempts}</strong>{" "}
+                  attempt(s) remaining
+                </p>
+              )}
+            </div> */}
 
             {/* Tips */}
             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6">

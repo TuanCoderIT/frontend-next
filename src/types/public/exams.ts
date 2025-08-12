@@ -27,6 +27,8 @@ export interface QuizInfo {
   attempts: number;
   max_attempts: number;
   estimated_time: string;
+  price_token: number;
+  is_purchased: boolean;
 }
 
 export interface QuizHistoryItem {

@@ -8,26 +8,20 @@ import { QuizHistoryItem } from "@/types/public/exams";
 import { UserProfile, UpdateProfileData, ChangePasswordData } from "@/types/public/user";
 import {
   User,
-  Mail,
   Calendar,
-  MapPin,
   Phone,
   Edit3,
   Save,
   X,
   Lock,
-  Eye,
-  EyeOff,
   Trophy,
   Clock,
   Target,
   Award,
   BookOpen,
   TrendingUp,
-  Star,
   CheckCircle,
   AlertCircle,
-  MessageCircle,
   LockKeyholeOpen,
   LockKeyhole
 } from "lucide-react";
