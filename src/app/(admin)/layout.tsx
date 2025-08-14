@@ -6,13 +6,18 @@ import Sidebar from "@/components/admin/Sidebar";
 import { ProgressBar } from "@lexz451/next-nprogress";
 import ForbiddenPage from "@/app/(admin)/403";
 import { useAuth } from "@/context/AuthContext";
+import { DataLoading, PageLoading } from "@/components/common/LoadingScreen";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <DataLoading />
+  }
 
   if (!user || user.role !== "admin") {
     return <ForbiddenPage />;

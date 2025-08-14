@@ -37,6 +37,7 @@ export interface Quiz {
   updated_at: string;
   enrollment_count: number;
   last_attempt_date?: string;
+  price_token: number | null;
 }
 
 export interface Question {

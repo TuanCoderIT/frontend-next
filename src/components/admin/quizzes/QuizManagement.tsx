@@ -210,7 +210,7 @@ export default function QuizManagement() {
                   Questions
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Enrollments
+                  Price
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Actions
@@ -262,11 +262,11 @@ export default function QuizManagement() {
                     </div>
                     <div className="text-xs text-gray-500">questions</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {quiz.enrollment_count}
+                  <td className="px-6 py-4 text-center">
+                    <div className="text-sm text-green-900">
+                      {quiz.price_token}
                     </div>
-                    <div className="text-xs text-gray-500">students</div>
+                    <div className="text-xs text-gray-500">Tokens</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">

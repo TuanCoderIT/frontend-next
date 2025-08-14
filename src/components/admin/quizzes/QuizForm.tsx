@@ -21,6 +21,7 @@ interface QuizFormData {
   prerequisites: string[];
   tags: string[];
   color: string;
+  price_token: number;
 }
 
 interface QuizFormProps {
@@ -48,6 +49,7 @@ export default function QuizForm({
     prerequisites: initialData?.prerequisites || [],
     tags: initialData?.tags || [],
     color: initialData?.color || "#3B82F6",
+    price_token: initialData?.price_token || 0,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -76,6 +78,7 @@ export default function QuizForm({
     setErrors({});
 
     try {
+      console.log("Test data form: ", formData);
       await onSubmit?.(formData);
       router.push("/admin/quizzes");
     } catch (error: any) {
@@ -235,25 +238,40 @@ export default function QuizForm({
               </div>
 
               {/* Color */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quiz Color (Optional)
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={formData.color}
-                    onChange={(e) => handleInputChange("color", e.target.value)}
-                    className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={formData.color}
-                    onChange={(e) => handleInputChange("color", e.target.value)}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="#3B82F6"
-                  />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Quiz Color (Optional)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={formData.color}
+                      onChange={(e) => handleInputChange("color", e.target.value)}
+                      className="w-10 h-10 border shadow-md border-gray-300 rounded-lg cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={formData.color}
+                      onChange={(e) => handleInputChange("color", e.target.value)}
+                      className="flex-1 px-4 py-2 shadow-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="#3B82F6"
+                    />
+                  </div>
                 </div>
+                <FormInput
+                  label="Price (Tokens)"
+                  name="price_token"
+                  type="number"
+                  value={formData.price_token?.toString() ?? ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "price_token",
+                      e.target.value === "" ? 0 : Number(e.target.value)
+                    )
+                  }
+                  error={errors.price_token}
+                />
               </div>
             </div>
 
@@ -322,13 +340,12 @@ export default function QuizForm({
                   <p>
                     <span className="font-medium">Status:</span>
                     <span
-                      className={`ml-2 px-2 py-1 rounded-full text-xs ${
-                        formData.status === "Published"
-                          ? "bg-green-100 text-green-800"
-                          : formData.status === "Draft"
+                      className={`ml-2 px-2 py-1 rounded-full text-xs ${formData.status === "Published"
+                        ? "bg-green-100 text-green-800"
+                        : formData.status === "Draft"
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-gray-100 text-gray-800"
-                      }`}
+                        }`}
                     >
                       {formData.status || "Draft"}
                     </span>
@@ -344,11 +361,10 @@ export default function QuizForm({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`px-5 py-2.5 cursor-pointer text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-lg shadow-md hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                isSubmitting
-                  ? "opacity-70 cursor-not-allowed"
-                  : "transform transition hover:-translate-y-1"
-              }`}
+              className={`px-5 py-2.5 cursor-pointer text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-lg shadow-md hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isSubmitting
+                ? "opacity-70 cursor-not-allowed"
+                : "transform transition hover:-translate-y-1"
+                }`}
             >
               {isSubmitting ? (
                 <div className="flex items-center">

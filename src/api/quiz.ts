@@ -11,79 +11,73 @@ export const getQuizzes = async (categoryId?: number | string) => {
   return res.data;
 };
 
-// CREATE
-export const createQuiz = async (formData: any) => {
+// utils: build payload cho cả create & update
+const buildQuizFormData = (formData: any, isUpdate = false) => {
   const formPayload = new FormData();
-  formPayload.append('title', formData.title);
-  formPayload.append('description', formData.description || '');
-  formPayload.append('category_id', String(formData.category?.id)); // ✅ fix
-  formPayload.append('difficulty', formData.difficulty);
-  formPayload.append('duration', String(formData.duration));
-  formPayload.append('color', formData.color || '');
-  formPayload.append('passing_score', String(formData.passingScore)); // ✅ fix
-  formPayload.append('max_attempts', String(formData.maxAttempts));   // ✅ fix
-  // ✅ ensure mảng JSON.stringify được an toàn
+
+  const appendField = (key: string, value: any) => {
+    if (value !== undefined && value !== null) {
+      formPayload.append(key, String(value));
+    }
+  };
+
+  appendField("title", formData.title);
+  appendField("description", formData.description || "");
+  appendField("category_id", formData.category?.id);
+  appendField("difficulty", formData.difficulty);
+  appendField("duration", formData.duration);
+  appendField("color", formData.color || "");
+  appendField("passing_score", formData.passingScore);
+  appendField("max_attempts", formData.maxAttempts);
+  appendField("price_token", formData.price_token ?? 0); // ✅ thêm token
+
   if (Array.isArray(formData.learning_objectives)) {
     formData.learning_objectives.forEach((item: string | Blob) => {
-      formPayload.append('learning_objectives[]', item);
+      formPayload.append("learning_objectives[]", item);
     });
   }
   if (Array.isArray(formData.prerequisites)) {
     formData.prerequisites.forEach((item: string | Blob) => {
-      formPayload.append('prerequisites[]', item);
+      formPayload.append("prerequisites[]", item);
     });
   }
   if (Array.isArray(formData.tags)) {
     formData.tags.forEach((item: string | Blob) => {
-      formPayload.append('tags[]', item);
+      formPayload.append("tags[]", item);
     });
   }
-  formPayload.append('status', formData.status);
 
-  return await axiosAPI.post('admin/exams', formPayload, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+  appendField("status", formData.status);
+
+  if (isUpdate) {
+    formPayload.append("_method", "PUT"); // Laravel update
+  }
+
+  return formPayload;
+};
+
+// CREATE
+export const createQuiz = async (formData: any) => {
+  const formPayload = buildQuizFormData(formData);
+  return await axiosAPI.post("admin/exams", formPayload, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
-}
+};
 
 // UPDATE
 export const updateQuiz = async (id: number, formData: any) => {
-  const formPayload = new FormData();
-  formPayload.append('title', formData.title);
-  formPayload.append('description', formData.description || '');
-  formPayload.append('category_id', String(formData.category?.id)); // ✅ fix
-  formPayload.append('difficulty', formData.difficulty);
-  formPayload.append('duration', String(formData.duration));
-  formPayload.append('color', formData.color || '');
-  formPayload.append('passing_score', String(formData.passingScore)); // ✅ fix
-  formPayload.append('max_attempts', String(formData.maxAttempts));   // ✅ fix
-  // ✅ ensure mảng JSON.stringify được an toàn
-  if (Array.isArray(formData.learning_objectives)) {
-    formData.learning_objectives.forEach((item: string | Blob) => {
-      formPayload.append('learning_objectives[]', item);
-    });
-  }
-  if (Array.isArray(formData.prerequisites)) {
-    formData.prerequisites.forEach((item: string | Blob) => {
-      formPayload.append('prerequisites[]', item);
-    });
-  }
-  if (Array.isArray(formData.tags)) {
-    formData.tags.forEach((item: string | Blob) => {
-      formPayload.append('tags[]', item);
-    });
-  }
-  formPayload.append('status', formData.status);
-  formPayload.append('_method', 'PUT'); // Laravel expects this for updates
+  const formPayload = buildQuizFormData(formData, true);
   return await axiosAPI.post(`admin/exams/${id}`, formPayload, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { "Content-Type": "multipart/form-data" },
   });
-}
+};
 
 // DELETE
 export const deleteQuiz = async (id: number) => {
   return await axiosAPI.delete(`admin/exams/${id}`);
-}
+};
 
+// 
 export const getQuizById = async (id: number) => {
   const res = await axiosAPI.get(`/exams/${id}`);
   return res.data;
@@ -119,4 +113,3 @@ export const getUserQuizHistory = async (userId: number) => {
   const res = await axiosAPI.get(`/results?user_id=${userId}`);
   return res.data as QuizHistoryItem[];
 };
-

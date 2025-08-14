@@ -9,6 +9,7 @@ import { axiosAPI } from "@/api/axios";
 interface AuthContextProps {
   user: User | null;
   token: string | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -19,17 +20,31 @@ const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // useEffect(() => {
+  //   const savedToken = localStorage.getItem("token");
+  //   if (savedToken) {
+  //     setToken(savedToken);
+  //     axiosAPI.defaults.headers.common[
+  //       "Authorization"
+  //     ] = `Bearer ${savedToken}`;
+  //     fetchUser()
+  //       .then(setUser)
+  //       .catch((err: any) => console.error("Lỗi khi lấy user:", err));
+  //   }
+  // }, []);
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     if (savedToken) {
       setToken(savedToken);
-      axiosAPI.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${savedToken}`;
+      axiosAPI.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
       fetchUser()
         .then(setUser)
-        .catch((err: any) => console.error("Lỗi khi lấy user:", err));
+        .catch((err: any) => console.error("Lỗi khi lấy user:", err))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -58,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
