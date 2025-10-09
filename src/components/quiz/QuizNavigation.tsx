@@ -1,7 +1,8 @@
 interface QuizNavigationProps {
   currentQuestion: number;
   totalQuestions: number;
-  answers: number[];
+  // answers: number[];
+  answers: string[];
   onPrevious: () => void;
   onNext: () => void;
   onQuestionJump: (questionIndex: number) => void;
@@ -19,7 +20,8 @@ export default function QuizNavigation({
 }: QuizNavigationProps) {
   const isFirstQuestion = currentQuestion === 0;
   const isLastQuestion = currentQuestion === totalQuestions - 1;
-  const answeredQuestions = answers.filter((answer) => answer !== -1).length;
+  // const answeredQuestions = answers.filter((answer) => answer !== -1).length;
+  const answeredQuestions = answers.filter((answer) => answer !== "").length;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -36,7 +38,8 @@ export default function QuizNavigation({
               className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
                 index === currentQuestion
                   ? "bg-blue-600 text-white shadow-lg"
-                  : answers[index] !== -1
+                  : // : answers[index] !== -1
+                  answers[index] !== ""
                   ? "bg-green-100 text-green-800 hover:bg-green-200"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}

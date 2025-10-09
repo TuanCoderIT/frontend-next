@@ -18,7 +18,9 @@ export default function QuizDetailPage() {
   const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [purchased, setPurchased] = useState(false);
-  const [ratingStats, setRatingStats] = useState<RatingStats | undefined>(undefined);
+  const [ratingStats, setRatingStats] = useState<RatingStats | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -305,21 +307,24 @@ export default function QuizDetailPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <button
                 onClick={handleStartQuiz}
-                disabled={isLoading || quizInfo.attempts >= quizInfo.max_attempts}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${quizInfo.attempts >= quizInfo.max_attempts
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
-                  }`}
+                disabled={
+                  isLoading || quizInfo.attempts >= quizInfo.max_attempts
+                }
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                  quizInfo.attempts >= quizInfo.max_attempts
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+                }`}
               >
                 {isLoading
                   ? "Processing..."
                   : quizInfo.attempts >= quizInfo.max_attempts
-                    ? "Max Attempts Reached"
-                    : quizInfo.price_token > 0
-                      ? purchased
-                        ? "Start Quiz"
-                        : `Buy & Start - ${quizInfo.price_token} tokens`
-                      : "Start Quiz - Free"}
+                  ? "Max Attempts Reached"
+                  : quizInfo.price_token > 0
+                  ? purchased
+                    ? "Start Quiz"
+                    : `Buy & Start - ${quizInfo.price_token} tokens`
+                  : "Start Quiz - Free"}
               </button>
 
               {quizInfo.attempts < quizInfo.max_attempts && (

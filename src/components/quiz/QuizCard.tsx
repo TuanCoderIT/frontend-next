@@ -7,7 +7,7 @@ interface Quiz {
   description: string;
   category: Category;
   difficulty: string;
-  questions: number;
+  questions_count: number;
   duration: number;
   progress: number;
   color: string;
@@ -42,13 +42,14 @@ export default function QuizCard({ quiz }: QuizCardProps) {
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
       {/* Header with gradient */}
       <div
-        className={`h-32 ${!isHexColor ? `bg-gradient-to-r ${colorClass}` : ""
-          } relative`}
+        className={`h-32 ${
+          !isHexColor ? `bg-gradient-to-r ${colorClass}` : ""
+        } relative`}
         style={
           isHexColor
             ? {
-              background: `linear-gradient(90deg, ${quiz.color}, ${quiz.color})`,
-            }
+                background: `linear-gradient(90deg, ${quiz.color}, ${quiz.color})`,
+              }
             : undefined
         }
       >
@@ -68,7 +69,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
 
       {/* Content */}
       <div className="p-6">
-        <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+        <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-2">
           {quiz.description}
         </p>
 
@@ -88,7 +89,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
                 d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            {quiz.questions} questions
+            {quiz.questions_count} questions
           </div>
           <div className="flex items-center">
             <svg
@@ -108,8 +109,8 @@ export default function QuizCard({ quiz }: QuizCardProps) {
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mb-4">
+        {/* Progress Bar - chưa cần dùng đến */}
+        {/* <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">Progress</span>
             <span className="text-sm text-gray-500">{quiz.progress}%</span>
@@ -120,7 +121,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
               style={{ width: `${quiz.progress}%` }}
             ></div>
           </div>
-        </div>
+        </div> */}
 
         {/* Action Buttons */}
         <div className="flex gap-3">

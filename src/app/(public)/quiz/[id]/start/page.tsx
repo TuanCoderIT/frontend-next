@@ -13,42 +13,31 @@ import { DataLoading } from "@/components/common/LoadingScreen";
 export default function QuizStartPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const id = params.id;
+  const id = params.id ? parseInt(params.id, 10) : NaN; // Chuyển đổi id sang số và kiểm tra
   const [quizData, setQuizData] = useState<QuizData | null>(null);
-  const [answers, setAnswers] = useState<number[]>([]);
+  // const [answers, setAnswers] = useState<number[]>([]);
+  const [answers, setAnswers] = useState<string[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
 
-  // Fetch quiz data
   useEffect(() => {
     const fetchQuizData = async () => {
+      if (!id) return;
+
       try {
         setIsLoading(true);
-        const raw = await getQuizById(Number(id));
+        // Nhận dữ liệu đã chuẩn hóa trực tiếp từ API
+        const data: QuizData = await getQuizById(id);
 
-        // Normalize backend -> frontend shape
-        const normalized: QuizData = {
-          id: raw.id,
-          title: raw.title,
-          duration: raw.duration,
-          questions: (raw.questions as RawQuestion[]).map((q) => ({
-            id: q.id,
-            question: q.content,
-            options: Object.values(q.options),
-            correctAnswer: Object.keys(q.options).indexOf(q.answer),
-            explanation: q.explanation || "",
-          })),
-        };
-
-        setQuizData(normalized);
-        setTimeLeft(normalized.duration * 60);
-        setAnswers(new Array(normalized.questions.length).fill(-1));
-        setIsLoading(false);
+        setQuizData(data);
+        setTimeLeft(data.duration * 60);
+        setAnswers(new Array(data.questions.length).fill(-1));
       } catch (err) {
-        console.error(err);
+        console.error("Lỗi khi tải dữ liệu quiz:", err);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -60,10 +49,22 @@ export default function QuizStartPage() {
     try {
       if (!quizData) return;
 
-      const score = answers.reduce((total, answer, index) => {
-        return (
-          total + (answer === quizData.questions[index].correctAnswer ? 1 : 0)
-        );
+      // const score = answers.reduce((total, answer, index) => {
+      //   return (
+      //     total + (answer === quizData.questions[index].correctAnswer ? 1 : 0)
+      //   );
+      // }, 0);
+      // const score = answers.reduce((total, answerIndex, index) => {
+      //   const userAnswer =
+      //     quizData.questions[index].options?.[answerIndex] ?? "";
+
+      //   const isCorrect = quizData.questions[index].answer.includes(userAnswer);
+
+      //   return total + (isCorrect ? 1 : 0);
+      // }, 0);
+      const score = answers.reduce((total, userAnswer, index) => {
+        const correctAnswer = quizData.questions[index].answer; // ví dụ: "A"
+        return total + (userAnswer === correctAnswer ? 1 : 0);
       }, 0);
 
       const total = quizData.questions.length;
@@ -73,16 +74,6 @@ export default function QuizStartPage() {
         .toISOString()
         .slice(0, 19)
         .replace("T", " ");
-
-      // await submitQuizResult({
-      //   exam_id: quizData.id,
-      //   user_id: 1,
-      //   score,
-      //   total,
-      //   percentage,
-      //   time_spent: timeSpent,
-      //   completed_at: completedAt,
-      // });
       const token = localStorage.getItem("token"); // lấy từ localStorage sau login
       if (!token) {
         router.push("/auth/login"); // hoặc hiện thông báo
@@ -133,9 +124,14 @@ export default function QuizStartPage() {
     return () => clearInterval(timer);
   }, [timeLeft, quizStarted, handleSubmitQuiz]);
 
-  const handleAnswerSelect = (answerIndex: number) => {
+  // const handleAnswerSelect = (answerIndex: number) => {
+  //   const updated = [...answers];
+  //   updated[currentQuestion] = answerIndex;
+  //   setAnswers(updated);
+  // };
+  const handleAnswerSelect = (key: string) => {
     const updated = [...answers];
-    updated[currentQuestion] = answerIndex;
+    updated[currentQuestion] = key; // lưu "A", "B", "C", hoặc "D"
     setAnswers(updated);
   };
 
@@ -155,7 +151,8 @@ export default function QuizStartPage() {
     setCurrentQuestion(idx);
   };
 
-  const answered = answers.filter((a) => a !== -1).length;
+  // const answered = answers.filter((a) => a !== -1).length;
+  const answered = answers.filter((a) => a !== "").length;
   const progress = (answered / (quizData?.questions.length || 1)) * 100;
 
   if (isLoading || !quizData) {
@@ -196,6 +193,12 @@ export default function QuizStartPage() {
         </div>
 
         {/* Question */}
+        {/* <QuestionCard
+          question={quizData.questions[currentQuestion]}
+          selectedAnswer={answers[currentQuestion]}
+          onAnswerSelect={handleAnswerSelect}
+          questionNumber={currentQuestion + 1}
+        /> */}
         <QuestionCard
           question={quizData.questions[currentQuestion]}
           selectedAnswer={answers[currentQuestion]}

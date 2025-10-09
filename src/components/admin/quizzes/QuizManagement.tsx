@@ -113,6 +113,7 @@ export default function QuizManagement() {
     { value: "Database", label: "Database" },
     { value: "Mathematics", label: "Mathematics" },
     { value: "Science", label: "Science" },
+    { value: "Languages", label: "Languages" },
   ];
 
   const difficultyOptions = [
@@ -236,7 +237,7 @@ export default function QuizManagement() {
                             {quiz.title}
                           </p>
                         </div>
-                        <p className="text-sm text-gray-500 truncate">
+                        <p className="text-sm text-gray-500 truncate block max-w-xs">
                           {quiz.description}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">

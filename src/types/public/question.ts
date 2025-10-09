@@ -1,9 +1,12 @@
 export interface Question {
   id: number;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
+  content: string;
+  type: 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
+  options?: Record<string, string>;
+  // options?: string[];
+  answer: string;
+  explanation?: string;
+  points: number;
 }
 
 export interface QuizData {

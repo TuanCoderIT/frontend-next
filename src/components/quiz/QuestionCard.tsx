@@ -1,15 +1,9 @@
-interface Question {
-  id: number;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-}
+import { Question } from "@/types/public/question";
 
 interface QuestionCardProps {
   question: Question;
-  selectedAnswer: number;
-  onAnswerSelect: (answerIndex: number) => void;
+  selectedAnswer: string; // đổi từ number → string
+  onAnswerSelect: (answerKey: string) => void; // đổi kiểu param
   questionNumber: number;
 }
 
@@ -29,65 +23,129 @@ export default function QuestionCard({
           </span>
         </div>
         <h2 className="text-2xl font-semibold text-gray-900 leading-relaxed">
-          {question.question}
+          {question.content}
         </h2>
       </div>
 
       {/* Answer Options */}
       <div className="space-y-4">
-        {question.options.map((option, index) => (
-          <button
-            key={index}
-            onClick={() => onAnswerSelect(index)}
-            className={`w-full text-left p-6 rounded-xl border-2 transition-all duration-200 ${
-              selectedAnswer === index
-                ? "border-blue-500 bg-blue-50 shadow-md"
-                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-            }`}
-          >
-            <div className="flex items-center">
-              <div
-                className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${
-                  selectedAnswer === index
-                    ? "border-blue-500 bg-blue-500"
-                    : "border-gray-300"
-                }`}
-              >
-                {selectedAnswer === index && (
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
-              </div>
+        {question.type === "multiple_choice" &&
+          question.options &&
+          Object.entries(question.options).map(([key, value], index) => (
+            <button
+              key={key}
+              onClick={() => onAnswerSelect(key)} // pass key "A" | "B" | "C" | "D"
+              className={`w-full text-left p-6 rounded-xl border-2 transition-all duration-200 ${
+                selectedAnswer === key
+                  ? "border-blue-500 bg-blue-50 shadow-md"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+              }`}
+            >
               <div className="flex items-center">
-                <span
-                  className={`text-sm font-semibold mr-3 ${
-                    selectedAnswer === index ? "text-blue-700" : "text-gray-500"
+                <div
+                  className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${
+                    selectedAnswer === key
+                      ? "border-blue-500 bg-blue-500"
+                      : "border-gray-300"
                   }`}
                 >
-                  {String.fromCharCode(65 + index)}.
+                  {selectedAnswer === key && (
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <span
+                  className={`text-sm font-semibold mr-3 ${
+                    selectedAnswer === key ? "text-blue-700" : "text-gray-500"
+                  }`}
+                >
+                  {key}.
                 </span>
                 <span
                   className={`text-lg ${
-                    selectedAnswer === index ? "text-blue-900" : "text-gray-700"
+                    selectedAnswer === key ? "text-blue-900" : "text-gray-700"
                   }`}
                 >
-                  {option}
+                  {value}
                 </span>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          ))}
+
+        {question.type === "true_false" && (
+          <div className="flex flex-col gap-3">
+            {/* {"A": "True", "B": "False"} */}
+            {["A", "B"].map((key) => (
+              <button
+                key={key}
+                onClick={() => onAnswerSelect(key)}
+                className={`w-full text-left p-6 rounded-xl border-2 transition-all duration-200 ${
+                  selectedAnswer === key
+                    ? "border-blue-500 bg-blue-50 shadow-md"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center">
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${
+                      selectedAnswer === key
+                        ? "border-blue-500 bg-blue-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {selectedAnswer === key && (
+                      <svg
+                        className="w-3 h-3 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  <span
+                    className={`text-lg ${
+                      selectedAnswer === key ? "text-blue-900" : "text-gray-700"
+                    }`}
+                  >
+                    {key === "A" ? "True" : "False"}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {(question.type === "short_answer" || question.type === "essay") && (
+          <textarea
+            className="w-full p-4 border rounded-lg"
+            rows={question.type === "essay" ? 6 : 2}
+            placeholder={
+              question.type === "essay"
+                ? "Write your essay answer here..."
+                : "Type your answer..."
+            }
+            value={selectedAnswer || ""}
+            onChange={(e) => onAnswerSelect(e.target.value)}
+          />
+        )}
       </div>
 
       {/* Help Text */}

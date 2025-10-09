@@ -5,21 +5,35 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ScoreCircle from "@/components/quiz/ScoreCircle";
 import AnswerBreakdown from "@/components/quiz/AnswerBreakdown";
+import { Question } from "@/types/public/question";
 
+// interface QuizResultsData {
+//   quiz: {
+//     id: number;
+//     title: string;
+//     questions: Array<{
+//       id: number;
+//       question: string;
+//       options: string[];
+//       correctAnswer: number;
+//       explanation: string;
+//     }>;
+//   };
+//   results: {
+//     answers: number[];
+//     score: number;
+//     total: number;
+//     timeSpent: number;
+//   };
+// }
 interface QuizResultsData {
   quiz: {
     id: number;
     title: string;
-    questions: Array<{
-      id: number;
-      question: string;
-      options: string[];
-      correctAnswer: number;
-      explanation: string;
-    }>;
+    questions: Question[];
   };
   results: {
-    answers: number[];
+    answers: string[]; // đổi sang string[] vì bạn lưu A/B/C/D
     score: number;
     total: number;
     timeSpent: number;
