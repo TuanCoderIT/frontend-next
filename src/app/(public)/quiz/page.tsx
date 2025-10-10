@@ -7,6 +7,7 @@ import SearchBar from "@/components/quiz/SearchBar";
 import CategoryFilter from "@/components/quiz/CategoryFilter";
 import { Exam } from "@/types/public/exams";
 import { Category } from "@/types/public/category";
+import Pagination from "@/components/common/Pagination";
 
 export default function QuizListPage() {
   const [quizzes, setQuizzes] = useState<Exam[]>([]);
@@ -15,6 +16,8 @@ export default function QuizListPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | number>(
     "All"
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -38,6 +41,15 @@ export default function QuizListPage() {
       quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quiz.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // --- LOGIC PHÂN TRANG (PAGINATION SLICING) ---
+  const indexOfLastQuiz = currentPage * pageSize;
+  const indexOfFirstQuiz = indexOfLastQuiz - pageSize;
+  const paginatedQuizzes = filteredQuizzes.slice(
+    indexOfFirstQuiz,
+    indexOfLastQuiz
+  );
+  // --- KẾT THÚC LOGIC PHÂN TRANG ---
 
   const selectedCategoryName =
     selectedCategory === "All"
@@ -115,11 +127,22 @@ export default function QuizListPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredQuizzes.map((quiz) => (
+                {paginatedQuizzes.map((quiz) => (
                   <QuizCard key={quiz.id} quiz={quiz} />
                 ))}
               </div>
             )}
+
+            {/* Pagination */}
+            <div className="px-4 py-3 border-t border-gray-200">
+              <Pagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalItems={filteredQuizzes.length}
+                onPageChange={setCurrentPage}
+                showPageSizeDropdown={false}
+              />
+            </div>
           </div>
         </div>
       </div>

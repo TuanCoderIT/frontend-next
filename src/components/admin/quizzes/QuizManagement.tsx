@@ -13,6 +13,7 @@ import CustomLink from "../common/CustomLink";
 import PageHeader from "../common/PageHeader";
 import AdminBreadcrumb from "../common/AdminBreadcrumb";
 import { getQuizzes } from "@/api/quiz";
+import Pagination from "@/components/common/Pagination";
 import { DataLoading } from "@/components/common/LoadingScreen";
 
 export default function QuizManagement() {
@@ -21,6 +22,8 @@ export default function QuizManagement() {
   const [filteredQuizzes, setFilteredQuizzes] = useState<Quiz[]>([]);
   const [filters, setFilters] = useState<QuizFilters>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Mock data - Replace with actual API calls
   useEffect(() => {
@@ -76,6 +79,16 @@ export default function QuizManagement() {
 
     setFilteredQuizzes(filtered);
   }, [quizzes, filters]);
+
+  // Reset to first page when filters change or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, pageSize]);
+
+  const paginatedQuizzes = filteredQuizzes.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handleSearch = (query: string) => {
     setFilters((prev) => ({ ...prev, search: query }));
@@ -219,7 +232,7 @@ export default function QuizManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredQuizzes.map((quiz) => (
+              {paginatedQuizzes.map((quiz) => (
                 <tr
                   key={quiz.id}
                   className="hover:bg-gray-50 transition-colors"
@@ -291,6 +304,18 @@ export default function QuizManagement() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="px-4 py-3 border-t border-gray-200">
+          <Pagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={filteredQuizzes.length}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            pageSizeOptions={[5, 10, 20]}
+          />
         </div>
 
         {filteredQuizzes.length === 0 && (
