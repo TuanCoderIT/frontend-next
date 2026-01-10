@@ -13,7 +13,7 @@ interface PurchaseHeaderProps {
 }
 
 export default function PurchaseHeader({
-    title = "My Purchases",
+    title = "Lịch sử mua hàng",
     searchQuery,
     onSearchChange,
     className,
@@ -28,7 +28,7 @@ export default function PurchaseHeader({
         >
             <div>
                 <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-                <p className="text-gray-600 mt-1">View and manage your purchased content</p>
+                <p className="text-gray-600 mt-1">Xem và quản lý nội dung đã mua</p>
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
                 {rightSlot}
@@ -38,7 +38,7 @@ export default function PurchaseHeader({
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
                         type="text"
-                        placeholder="Search purchases..."
+                        placeholder="Tìm kiếm mua hàng..."
                         className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                     />
                 </div>

@@ -41,7 +41,7 @@ export default function WalletReturnPage() {
                         <p className="text-lg">
                             Số dư hiện tại của bạn là: <strong>{balance}</strong> token
                             <br />
-                            <Link href={'/wallet'}>Go to my Wallet</Link>
+                            <Link href={'/wallet'}>Đến ví của tôi</Link>
                         </p>
                     )}
                 </div>

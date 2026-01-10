@@ -90,7 +90,7 @@ export default function UserForm({
               required
               options={[
                 { label: "Admin", value: "admin" },
-                { label: "Editor", value: "editor" },
+                { label: "Instructor", value: "instructor" },
                 { label: "User", value: "user" },
               ]}
             />
@@ -158,11 +158,10 @@ export default function UserForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-5 py-2.5 cursor-pointer text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-lg shadow-md hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                isSubmitting
+              className={`px-5 py-2.5 cursor-pointer text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-lg shadow-md hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isSubmitting
                   ? "opacity-70 cursor-not-allowed"
                   : "transform transition hover:-translate-y-1"
-              }`}
+                }`}
             >
               {isSubmitting ? (
                 <div className="flex items-center">

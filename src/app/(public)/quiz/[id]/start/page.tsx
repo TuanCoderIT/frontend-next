@@ -3,17 +3,17 @@
 import { useState, useEffect, useCallback, use } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { QuizData, RawQuestion } from "@/types/public/question";
-import QuizTimer from "@/components/quiz/QuizTimer";
-import QuizProgress from "@/components/quiz/QuizProgress";
-import QuestionCard from "@/components/quiz/QuestionCard";
-import QuizNavigation from "@/components/quiz/QuizNavigation";
+import QuizTimer from "@/components/public/quiz/QuizTimer";
+import QuizProgress from "@/components/public/quiz/QuizProgress";
+import QuestionCard from "@/components/public/quiz/QuestionCard";
+import QuizNavigation from "@/components/public/quiz/QuizNavigation";
 import { getQuizById, submitQuizResult } from "@/api/quiz";
 import { DataLoading } from "@/components/common/LoadingScreen";
 
 export default function QuizStartPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const id = params.id ? parseInt(params.id, 10) : NaN; // Chuyển đổi id sang số và kiểm tra
+  const id = params.id ? parseInt(params.id, 10) : NaN; 
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   // const [answers, setAnswers] = useState<number[]>([]);
   const [answers, setAnswers] = useState<string[]>([]);
@@ -29,12 +29,10 @@ export default function QuizStartPage() {
 
       try {
         setIsLoading(true);
-        // Nhận dữ liệu đã chuẩn hóa trực tiếp từ API
         const data: QuizData = await getQuizById(id);
-
         setQuizData(data);
         setTimeLeft(data.duration * 60);
-        setAnswers(new Array(data.questions.length).fill(-1));
+        setAnswers(new Array(data.questions.length).fill(""));
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu quiz:", err);
       } finally {
@@ -48,22 +46,8 @@ export default function QuizStartPage() {
   const handleSubmitQuiz = useCallback(async () => {
     try {
       if (!quizData) return;
-
-      // const score = answers.reduce((total, answer, index) => {
-      //   return (
-      //     total + (answer === quizData.questions[index].correctAnswer ? 1 : 0)
-      //   );
-      // }, 0);
-      // const score = answers.reduce((total, answerIndex, index) => {
-      //   const userAnswer =
-      //     quizData.questions[index].options?.[answerIndex] ?? "";
-
-      //   const isCorrect = quizData.questions[index].answer.includes(userAnswer);
-
-      //   return total + (isCorrect ? 1 : 0);
-      // }, 0);
       const score = answers.reduce((total, userAnswer, index) => {
-        const correctAnswer = quizData.questions[index].answer; // ví dụ: "A"
+        const correctAnswer = quizData.questions[index].answer;
         return total + (userAnswer === correctAnswer ? 1 : 0);
       }, 0);
 
@@ -124,11 +108,6 @@ export default function QuizStartPage() {
     return () => clearInterval(timer);
   }, [timeLeft, quizStarted, handleSubmitQuiz]);
 
-  // const handleAnswerSelect = (answerIndex: number) => {
-  //   const updated = [...answers];
-  //   updated[currentQuestion] = answerIndex;
-  //   setAnswers(updated);
-  // };
   const handleAnswerSelect = (key: string) => {
     const updated = [...answers];
     updated[currentQuestion] = key; // lưu "A", "B", "C", hoặc "D"
@@ -151,12 +130,11 @@ export default function QuizStartPage() {
     setCurrentQuestion(idx);
   };
 
-  // const answered = answers.filter((a) => a !== -1).length;
-  const answered = answers.filter((a) => a !== "").length;
+  const answered = answers.filter((a) => a !== "" && a !== -1).length;
   const progress = (answered / (quizData?.questions.length || 1)) * 100;
 
   if (isLoading || !quizData) {
-    return <DataLoading text="Loading quiz data..." />;
+    return <DataLoading text="Đang tải dữ liệu bài kiểm tra..." />;
   }
 
   return (
@@ -170,7 +148,7 @@ export default function QuizStartPage() {
                 {quizData.title}
               </h1>
               <p className="text-gray-600">
-                Question {currentQuestion + 1} of {quizData.questions.length}
+                Câu hỏi {currentQuestion + 1} / {quizData.questions.length}
               </p>
             </div>
             <div className="flex items-center gap-6">
@@ -179,7 +157,7 @@ export default function QuizStartPage() {
                 onClick={() => setShowConfirmSubmit(true)}
                 className="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700"
               >
-                Submit Quiz
+                Nộp bài
               </button>
             </div>
           </div>
@@ -193,12 +171,6 @@ export default function QuizStartPage() {
         </div>
 
         {/* Question */}
-        {/* <QuestionCard
-          question={quizData.questions[currentQuestion]}
-          selectedAnswer={answers[currentQuestion]}
-          onAnswerSelect={handleAnswerSelect}
-          questionNumber={currentQuestion + 1}
-        /> */}
         <QuestionCard
           question={quizData.questions[currentQuestion]}
           selectedAnswer={answers[currentQuestion]}
@@ -221,23 +193,22 @@ export default function QuizStartPage() {
         {showConfirmSubmit && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-8 max-w-md mx-4">
-              <h3 className="text-xl font-bold mb-4">Submit Quiz?</h3>
+              <h3 className="text-xl font-bold mb-4">Nộp bài?</h3>
               <p className="mb-6">
-                Answered {answered} of {quizData.questions.length}. Are you
-                sure?
+                Đã trả lời {answered} / {quizData.questions.length}. Bạn có chắc chắn?
               </p>
               <div className="flex gap-4">
                 <button
                   onClick={() => setShowConfirmSubmit(false)}
                   className="flex-1 px-4 py-2 border rounded-lg"
                 >
-                  Continue
+                  Tiếp tục
                 </button>
                 <button
                   onClick={handleSubmitQuiz}
                   className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg"
                 >
-                  Submit Now
+                  Nộp bài ngay
                 </button>
               </div>
             </div>
@@ -248,18 +219,18 @@ export default function QuizStartPage() {
         {!quizStarted && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-8 max-w-lg mx-4">
-              <h3 className="text-2xl font-bold mb-4">Quiz Instructions</h3>
+              <h3 className="text-2xl font-bold mb-4">Hướng dẫn bài kiểm tra</h3>
               <div className="space-y-3 mb-6 text-gray-600">
-                <p>• You have {quizData.duration} minutes</p>
-                <p>• {quizData.questions.length} questions total</p>
-                <p>• Navigate freely, autosave answers</p>
-                <p>• Click Submit when done</p>
+                <p>• Bạn có {quizData.duration} phút</p>
+                <p>• {quizData.questions.length} câu hỏi tổng cộng</p>
+                <p>• Di chuyển tự do, tự động lưu câu trả lời</p>
+                <p>• Nhấp nộp bài khi hoàn thành</p>
               </div>
               <button
                 onClick={() => setQuizStarted(true)}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg"
               >
-                Start Quiz Now
+                Bắt đầu bài kiểm tra ngay
               </button>
             </div>
           </div>

@@ -11,10 +11,10 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({
-    title = "You haven’t purchased anything yet.",
-    description = "Discover quizzes and content to start learning.",
+    title = "Bạn chưa mua bất kỳ thứ gì cả.",
+    description = "Khám phá bài kiểm tra và nội dung để bắt đầu học tập.",
     ctaHref = "/quiz",
-    ctaLabel = "Explore content",
+    ctaLabel = "Khám phá nội dung",
 }: EmptyStateProps) {
     return (
         <div className="text-center py-20">

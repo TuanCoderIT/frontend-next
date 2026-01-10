@@ -10,14 +10,14 @@ import { useEffect, useState } from "react";
 import Loading, { PageLoading } from "@/components/common/LoadingScreen";
 
 export default function EditQuizPage() {
-  const { id } = useParams(); // Next.js trả về chuỗi
+  const { id } = useParams();
   const [existingQuizData, setExistingQuizData] = useState<any>(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const data = await getQuizById(Number(id)); // convert id sang number
+        const data = await getQuizById(Number(id));
         setExistingQuizData(data);
       } catch (err) {
         console.error(err);

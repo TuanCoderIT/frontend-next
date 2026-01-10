@@ -7,7 +7,7 @@ import { QuizInfo } from "@/types/public/exams";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import { getQuizById } from "@/api/quiz";
 import { notify } from "@/utils/toast";
-import RatingSection from "@/components/public/RatingSection";
+import RatingSection from "@/components/public/ratings/RatingSection";
 import { RatingStats } from "@/types/public/rating";
 import { checkPurchase, purchaseItem } from "@/api/purchase";
 
@@ -18,6 +18,8 @@ export default function QuizDetailPage() {
   const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [purchased, setPurchased] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showTopUpPrompt, setShowTopUpPrompt] = useState(false);
   const [ratingStats, setRatingStats] = useState<RatingStats | undefined>(
     undefined
   );
@@ -50,7 +52,7 @@ export default function QuizDetailPage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading quiz details...</p>
+          <p className="text-gray-600">Đang tải thông tin bài kiểm tra...</p>
         </div>
       </div>
     );
@@ -59,33 +61,38 @@ export default function QuizDetailPage() {
   const handleStartQuiz = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      notify.error("You must be logged in to start the quiz.");
+      notify.error("Bạn phải đăng nhập để bắt đầu bài kiểm tra.");
       router.push("/auth/login?redirect=/quiz/" + quizInfo.id + "/start");
       return;
     }
 
-    // Nếu miễn phí hoặc đã mua
+    // Free or purchased → start directly
     if (quizInfo.price_token === 0 || purchased) {
       router.push(`/quiz/${quizInfo.id}/start`);
       return;
     }
 
-    // Nếu chưa mua → tiến hành mua
+    // Paid quiz, not yet purchased → show confirm modal
+    setShowConfirm(true);
+  };
+
+  const confirmPurchase = async () => {
     try {
       setIsLoading(true);
       const res = await purchaseItem("quiz", quizInfo.id);
-      notify.success(res.message || "Purchase successful");
+      notify.success(res.message || "Mua bài kiểm tra thành công!");
       setPurchased(true);
       router.push(`/quiz/${quizInfo.id}/start`);
     } catch (err: any) {
       if (err.response?.status === 400) {
-        notify.error("Insufficient tokens. Please top up.");
-        router.push("/wallet/top-up");
+        // Not enough token
+        setShowTopUpPrompt(true);
       } else {
-        notify.error(err.response?.data?.message || "Purchase failed");
+        notify.error(err.response?.data?.message || "Mua bài kiểm tra thất bại");
       }
     } finally {
       setIsLoading(false);
+      setShowConfirm(false);
     }
   };
 
@@ -171,7 +178,7 @@ export default function QuizDetailPage() {
             {/* Learning Objectives */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Learning Objectives
+                Mục tiêu học tập
               </h2>
               <div className="space-y-3">
                 {quizInfo.learning_objectives?.map((objective, index) => (
@@ -200,7 +207,7 @@ export default function QuizDetailPage() {
             {/* Prerequisites */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Prerequisites
+                Điều kiện tiên quyết
               </h2>
               <div className="space-y-3">
                 {quizInfo.prerequisites?.map((prerequisite, index) => (
@@ -229,7 +236,7 @@ export default function QuizDetailPage() {
             {/* Tags */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Topics Covered
+                Chủ đề được đề cập
               </h2>
               <div className="flex flex-wrap gap-3">
                 {(quizInfo?.tags ?? []).map((tag, index) => (
@@ -310,54 +317,90 @@ export default function QuizDetailPage() {
                 disabled={
                   isLoading || quizInfo.attempts >= quizInfo.max_attempts
                 }
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                  quizInfo.attempts >= quizInfo.max_attempts
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${quizInfo.attempts >= quizInfo.max_attempts
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
-                }`}
+                  }`}
               >
                 {isLoading
-                  ? "Processing..."
+                  ? "Đang xử lý..."
                   : quizInfo.attempts >= quizInfo.max_attempts
-                  ? "Max Attempts Reached"
-                  : quizInfo.price_token > 0
-                  ? purchased
-                    ? "Start Quiz"
-                    : `Buy & Start - ${quizInfo.price_token} tokens`
-                  : "Start Quiz - Free"}
+                    ? "Đã đạt số lần làm bài tối đa"
+                    : quizInfo.price_token > 0
+                      ? purchased
+                        ? "Bắt đầu bài kiểm tra"
+                        : `Mua & Bắt đầu - ${quizInfo.price_token} tokens`
+                      : "Bắt đầu bài kiểm tra - Miễn phí"}
               </button>
 
               {quizInfo.attempts < quizInfo.max_attempts && (
                 <p className="text-center text-sm text-gray-500 mt-3">
-                  You have{" "}
+                  Bạn có{" "}
                   <strong>{quizInfo.max_attempts - quizInfo.attempts}</strong>{" "}
-                  attempt(s) remaining
+                  lần làm bài còn lại
                 </p>
               )}
             </div>
-            {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <button
-                onClick={handleStartQuiz}
-                disabled={quizInfo.attempts >= quizInfo.max_attempts}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${quizInfo.attempts >= quizInfo.max_attempts
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
-                  }`}
-              >
-                {quizInfo.attempts >= quizInfo.max_attempts
-                  ? "Max Attempts Reached"
-                  : quizInfo.price_token > 0
-                    ? `Start Quiz - ${quizInfo.price_token} tokens`
-                    : "Start Quiz - Free"}
-              </button>
-              {quizInfo.attempts < quizInfo.max_attempts && (
-                <p className="text-center text-sm text-gray-500 mt-3">
-                  You have{" "}
-                  <strong>{quizInfo.max_attempts - quizInfo.attempts}</strong>{" "}
-                  attempt(s) remaining
-                </p>
-              )}
-            </div> */}
+
+            {/* Confirm purchase modal */}
+            {showConfirm && (
+              <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="bg-white rounded-2xl shadow-xl p-6 w-[360px]">
+                  <h2 className="text-xl font-semibold mb-3 text-center">
+                    Xác nhận mua bài kiểm tra
+                  </h2>
+                  <p className="text-gray-600 text-center mb-5">
+                    Bài kiểm tra này có giá{" "}
+                    <span className="font-semibold text-amber-600">
+                      {quizInfo.price_token} tokens
+                    </span>
+                    . Tiếp tục với việc mua?
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={() => setShowConfirm(false)}
+                      className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={confirmPurchase}
+                      className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white"
+                    >
+                      Xác nhận
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Not enough tokens prompt */}
+            {showTopUpPrompt && (
+              <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="bg-white rounded-2xl shadow-xl p-6 w-[360px]">
+                  <h2 className="text-xl font-semibold mb-3 text-center text-red-600">
+                    Không đủ tokens
+                  </h2>
+                  <p className="text-gray-600 text-center mb-5">
+                    Bạn không có đủ tokens để mua bài kiểm tra này.
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={() => setShowTopUpPrompt(false)}
+                      className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={() => router.push("/wallet/top-up")}
+                      className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Đến nạp tokens
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Tips */}
             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6">
@@ -375,13 +418,13 @@ export default function QuizDetailPage() {
                     d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                   />
                 </svg>
-                Quick Tips
+                Mẹo nhanh
               </h3>
               <ul className="space-y-2 text-yellow-800 text-sm">
-                <li>• Read each question carefully</li>
-                <li>• You can navigate between questions</li>
-                <li>• Review your answers before submitting</li>
-                <li>• Watch the timer in the top right</li>
+                <li>• Đọc kỹ mỗi câu hỏi</li>
+                <li>• Bạn có thể di chuyển giữa các câu hỏi</li>
+                <li>• Đánh giá câu trả lời của bạn trước khi nộp</li>
+                <li>• Xem đồng hồ trong góc trên bên phải</li>
               </ul>
             </div>
           </div>

@@ -68,20 +68,40 @@ export default function Navbar() {
               href="/"
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
-              Home
+              Trang chủ
+            </Link>
+            <Link
+              href="/courses"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+            >
+              Khóa học
             </Link>
             <Link
               href="/quiz"
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
-              Quizzes
+              Bài kiểm tra
+            </Link>
+            <Link
+              href="/documents"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+            >
+              Tài liệu
             </Link>
             <Link
               href="/groups"
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
-              Study Groups
+              Nhóm học tập
             </Link>
+            {user && (
+              <Link
+                href="/chat"
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              >
+                Chat
+              </Link>
+            )}
           </div>
 
           {/* Auth Buttons */}
@@ -127,28 +147,28 @@ export default function Navbar() {
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      My Account
+                      Tài khoản của tôi
                     </Link>
                     <Link
                       href="/purchases"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      My Purchases
+                      Đã mua
                     </Link>
                     <Link
                       href="/wallet"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      My Wallet
+                      Ví của tôi
                     </Link>
                     <hr className="my-2" />
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
                     >
-                      Logout
+                      Đăng xuất
                     </button>
                   </div>
                 )}
@@ -160,13 +180,13 @@ export default function Navbar() {
                   href="/auth/login"
                   className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
                 >
-                  Login
+                  Đăng nhập
                 </Link>
                 <Link
                   href="/auth/register"
                   className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
-                  Sign Up
+                  Đăng ký
                 </Link>
               </>
             )}

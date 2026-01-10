@@ -26,9 +26,8 @@ export default function Footer() {
               <span className="text-xl font-bold">IntelliQuiz</span>
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
-              Empowering students worldwide with interactive learning
-              experiences, collaborative study groups, and engaging educational
-              content.
+              Thúc đẩy học sinh trên toàn thế giới với trải nghiệm học tập tương tác, 
+              nhóm học tập hợp tác và nội dung giáo dục thú vị.
             </p>
             <div className="flex space-x-4">
               <a
@@ -72,7 +71,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4">Liên kết nhanh</h3>
             <ul className="space-y-2">
               <li>
                 <Link

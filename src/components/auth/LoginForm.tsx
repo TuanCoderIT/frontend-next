@@ -49,14 +49,14 @@ export default function LoginPage() {
             Learn Smarter,Study Better
           </h2>
           <p className="text-lg text-gray-700 mb-6">
-            Join study groups with fellow students, share knowledge, and tackle
-            challenging topics together. Collaborative learning has never been
-            easier.
+            Tham gia nhóm học với các bạn học sinh khác, chia sẻ kiến thức và
+            giải quyết các chủ đề khó khăn cùng nhau. Học tập đồng đội đã
+            bao giờ cũng dễ dàng hơn.
           </p>
           <div className="bg-white p-6 rounded-lg shadow-md border border-blue-100">
             <p className="text-gray-700 italic mb-4">
-              "Education is the most powerful weapon which you can use to change
-              the world." - Nelson Mandela
+              "Giáo dục là vũ khí mạnh nhất mà bạn có thể sử dụng để thay đổi
+              thế giới." - Nelson Mandela
             </p>
             <div className="flex items-center">
               <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -80,7 +80,7 @@ export default function LoginPage() {
                   IntelliQuiz
                 </p>
                 <p className="text-xs text-gray-500">
-                  Your gateway to smarter learning
+                  Cánh Cổng học tập thông minh
                 </p>
               </div>
             </div>
@@ -100,10 +100,10 @@ export default function LoginPage() {
             />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center md:text-left">
-            Login to IntelliQuiz
+            Đăng nhập vào IntelliQuiz
           </h2>
           <p className="text-gray-600 text-sm mb-8 text-center md:text-left">
-            Join thousands of students in our interactive learning platform.
+            Tham gia hàng ngàn học sinh trong nền tảng học tập tương tác của chúng tôi.
           </p>
 
           {error && (
@@ -134,7 +134,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Your email address
+                Email của bạn
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -159,7 +159,7 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Your password
+                Mật khẩu của bạn
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -196,7 +196,7 @@ export default function LoginPage() {
                   htmlFor="remember-me"
                   className="ml-2 block text-sm text-gray-700"
                 >
-                  Remember me
+                  Nhớ tôi
                 </label>
               </div>
 
@@ -205,7 +205,7 @@ export default function LoginPage() {
                   href="/auth/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Forgot your password?
+                  Quên mật khẩu của bạn?
                 </Link>
               </div>
             </div>
@@ -241,8 +241,8 @@ export default function LoginPage() {
                   </svg>
                 ) : null}
                 {isLoading
-                  ? "The system is logging in, please wait..."
-                  : "Login"}
+                  ? "Đang đăng nhập, vui lòng đợi..."
+                  : "Đăng nhập"}
               </button>
             </div>
           </form>
@@ -254,7 +254,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Or continue with
+                  Hoặc tiếp tục với
                 </span>
               </div>
             </div>
@@ -297,12 +297,12 @@ export default function LoginPage() {
 
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Do not have an account?{" "}
+              Bạn không có tài khoản?{" "}
               <Link
                 href="/auth/register"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Register now
+                Đăng ký ngay
               </Link>
             </p>
           </div>

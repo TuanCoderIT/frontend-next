@@ -1,6 +1,6 @@
 'use client';
 
-import TokenTopUp from "@/components/public/TokenTopUp";
+import TokenTopUp from "@/components/public/purchases/TokenTopUp";
 
 export default function () {
     return (

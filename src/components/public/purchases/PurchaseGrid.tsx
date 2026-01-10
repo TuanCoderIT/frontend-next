@@ -24,7 +24,7 @@ export default function PurchaseGrid({ items, hasMore, onLoadMore }: PurchaseGri
                         onClick={onLoadMore}
                         className="px-5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium shadow-sm"
                     >
-                        Load more
+                        Tải thêm
                     </button>
                 </div>
             )}

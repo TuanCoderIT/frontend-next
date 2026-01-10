@@ -52,7 +52,7 @@ export default function PurchasesPage() {
                 {/* Main content */}
                 <div className="mt-4">
                     {loading ? (
-                        <p className="text-center text-gray-500">Loading...</p>
+                        <p className="text-center text-gray-500">Đang tải...</p>
                     ) : pagedItems.length > 0 ? (
                         <PurchaseGrid
                             items={pagedItems}

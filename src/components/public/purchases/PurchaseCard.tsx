@@ -15,8 +15,8 @@ function formatDate(dateString: string) {
 }
 
 function formatPrice(tokens?: number | null) {
-    if (!tokens || tokens <= 0) return "Free";
-    return `Purchased for ${tokens} tokens`;
+    if (!tokens || tokens <= 0) return "Miễn phí";
+    return `Mua với ${tokens} tokens`;
 }
 
 function getTypeIcon(type: PurchaseItem["type"]) {
@@ -49,7 +49,7 @@ export default function PurchaseCard({ item }: { item: PurchaseItem }) {
             ? `/quiz/${item.meta.examId}`
             : "#";
 
-    const cta = item.type === "quiz" ? ("Start" as const) : ("View" as const);
+    const cta = item.type === "quiz" ? ("Bắt đầu" as const) : ("Xem" as const);
 
     return (
         <div className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
@@ -88,9 +88,9 @@ export default function PurchaseCard({ item }: { item: PurchaseItem }) {
                 {/* Quiz meta */}
                 {item.type === "quiz" && (
                     <div className="flex items-center gap-3 text-xs text-gray-500 mt-3">
-                        <span>{item.meta.questionsCount} questions</span>
+                        <span>{item.meta.questionsCount} câu hỏi</span>
                         <span>•</span>
-                        <span>{item.meta.durationMinutes} min</span>
+                        <span>{item.meta.durationMinutes} phút</span>
                         <span>•</span>
                         <span>{item.meta.difficulty}</span>
                     </div>

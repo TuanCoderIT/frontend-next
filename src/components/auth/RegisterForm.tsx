@@ -50,14 +50,14 @@ export default function RegisterPage() {
             Learn Smarter,Study Better
           </h2>
           <p className="text-lg text-gray-700 mb-6">
-            Join study groups with fellow students, share knowledge, and tackle
-            challenging topics together. Collaborative learning has never been
-            easier.
+            Tham gia nhóm học với các bạn học sinh khác, chia sẻ kiến thức và
+            giải quyết các chủ đề khó khăn cùng nhau. Học tập đồng đội đã
+            bao giờ cũng dễ dàng hơn.
           </p>
           <div className="bg-white p-6 rounded-lg shadow-md border border-blue-100">
             <p className="text-gray-700 italic mb-4">
-              "Education is the most powerful weapon which you can use to change
-              the world." - Nelson Mandela
+              "Giáo dục là vũ khí mạnh nhất mà bạn có thể sử dụng để thay đổi
+              thế giới." - Nelson Mandela
             </p>
             <div className="flex items-center">
               <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -81,7 +81,7 @@ export default function RegisterPage() {
                   IntelliQuiz
                 </p>
                 <p className="text-xs text-gray-500">
-                  Your gateway to smarter learning
+                  Cánh Cổng học tập thông minh
                 </p>
               </div>
             </div>
@@ -101,10 +101,10 @@ export default function RegisterPage() {
             />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center md:text-left">
-            Register new account
+            Đăng ký tài khoản mới
           </h2>
           <p className="text-gray-600 text-sm mb-8 text-center md:text-left">
-            Create your account to access all features and resources.
+            Tạo tài khoản của bạn để truy cập tất cả các tính năng và tài nguyên.
           </p>
 
           {error && (
@@ -135,7 +135,7 @@ export default function RegisterPage() {
                 htmlFor="userName"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Your username
+                Tên người dùng của bạn
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Your email address
+                Email của bạn
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -185,7 +185,7 @@ export default function RegisterPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Your password
+                Mật khẩu của bạn
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -204,7 +204,7 @@ export default function RegisterPage() {
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                Password must be at least 8 characters long.
+                Mật khẩu phải có ít nhất 8 ký tự.
               </p>
             </div>
 
@@ -213,7 +213,7 @@ export default function RegisterPage() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Confirm password
+                Xác nhận mật khẩu
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -245,13 +245,13 @@ export default function RegisterPage() {
                 htmlFor="terms"
                 className="ml-2 block text-sm text-gray-700"
               >
-                I agree with{" "}
+                Tôi đồng ý với{" "}
                 <a href="#" className="text-blue-600 hover:text-blue-500">
-                  Terms of use
+                  Điều khoản sử dụng
                 </a>{" "}
                 &{" "}
                 <a href="#" className="text-blue-600 hover:text-blue-500">
-                  Privacy policy
+                  Chính sách bảo mật
                 </a>
               </label>
             </div>
@@ -286,7 +286,7 @@ export default function RegisterPage() {
                     ></path>
                   </svg>
                 ) : null}
-                {isLoading ? "Processing, Please wait..." : "Sign Up"}
+                {isLoading ? "Đang xử lý, vui lòng đợi..." : "Đăng ký"}
               </button>
             </div>
           </form>
@@ -298,7 +298,7 @@ export default function RegisterPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Or continue with
+                  Hoặc tiếp tục với
                 </span>
               </div>
             </div>
@@ -341,12 +341,12 @@ export default function RegisterPage() {
 
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Do you have an account?{" "}
+              Bạn đã có tài khoản?{" "}
               <Link
                 href="/auth/login"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Login here
+                Đăng nhập tại đây
               </Link>
             </p>
           </div>

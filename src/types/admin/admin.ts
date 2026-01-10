@@ -68,3 +68,18 @@ export interface QuizFilters {
   search?: string;
   tags?: string[];
 }
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  color?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CategoryFilters {
+  search?: string;
+  is_active?: string;
+}

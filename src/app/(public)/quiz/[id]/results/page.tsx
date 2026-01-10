@@ -3,29 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import ScoreCircle from "@/components/quiz/ScoreCircle";
-import AnswerBreakdown from "@/components/quiz/AnswerBreakdown";
+import ScoreCircle from "@/components/public/quiz/ScoreCircle";
+import AnswerBreakdown from "@/components/public/quiz/AnswerBreakdown";
 import { Question } from "@/types/public/question";
 
-// interface QuizResultsData {
-//   quiz: {
-//     id: number;
-//     title: string;
-//     questions: Array<{
-//       id: number;
-//       question: string;
-//       options: string[];
-//       correctAnswer: number;
-//       explanation: string;
-//     }>;
-//   };
-//   results: {
-//     answers: number[];
-//     score: number;
-//     total: number;
-//     timeSpent: number;
-//   };
-// }
 interface QuizResultsData {
   quiz: {
     id: number;
@@ -33,7 +14,7 @@ interface QuizResultsData {
     questions: Question[];
   };
   results: {
-    answers: string[]; // đổi sang string[] vì bạn lưu A/B/C/D
+    answers: string[];
     score: number;
     total: number;
     timeSpent: number;
@@ -50,7 +31,6 @@ export default function QuizResultsPage() {
     if (storedResults) {
       setResultsData(JSON.parse(storedResults));
     } else {
-      // Redirect back to quiz if no results found
       router.push(`/quiz/${params.id}`);
     }
   }, [params.id, router]);
@@ -60,7 +40,7 @@ export default function QuizResultsPage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading results...</p>
+          <p className="text-gray-600">Đang tải kết quả...</p>
         </div>
       </div>
     );
@@ -74,30 +54,30 @@ export default function QuizResultsPage() {
   const getPerformanceMessage = (percentage: number) => {
     if (percentage >= 90)
       return {
-        message: "Excellent work! 🎉",
+        message: "Tuyệt vời! Giỏi lắm bro ơi 🎉",
         color: "text-green-600",
         bg: "bg-green-50",
       };
     if (percentage >= 80)
       return {
-        message: "Great job! 👏",
+        message: "Giỏi lắm bạn ơi! 👏",
         color: "text-blue-600",
         bg: "bg-blue-50",
       };
     if (percentage >= 70)
       return {
-        message: "Good effort! 👍",
+        message: "Khá ổn đó bro á! 👍",
         color: "text-yellow-600",
         bg: "bg-yellow-50",
       };
     if (percentage >= 60)
       return {
-        message: "Keep practicing! 📚",
+        message: "Tiếp tục luyện tập! 📚",
         color: "text-orange-600",
         bg: "bg-orange-50",
       };
     return {
-      message: "More study needed 💪",
+      message: "Ôi bạn ơi, về học lại đi! 💪",
       color: "text-red-600",
       bg: "bg-red-50",
     };
@@ -111,7 +91,7 @@ export default function QuizResultsPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Quiz Results
+            Kết quả bài kiểm tra
           </h1>
           <h2 className="text-2xl text-gray-600">{quiz.title}</h2>
         </div>
@@ -139,7 +119,7 @@ export default function QuizResultsPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-3 border-b border-gray-100">
                   <span className="text-gray-600 font-medium">
-                    Correct Answers:
+                    Số câu đúng:
                   </span>
                   <span className="text-2xl font-bold text-green-600">
                     {results.score}
@@ -147,7 +127,7 @@ export default function QuizResultsPage() {
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-100">
                   <span className="text-gray-600 font-medium">
-                    Incorrect Answers:
+                    Số câu sai:
                   </span>
                   <span className="text-2xl font-bold text-red-500">
                     {results.total - results.score}
@@ -155,14 +135,14 @@ export default function QuizResultsPage() {
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-100">
                   <span className="text-gray-600 font-medium">
-                    Total Questions:
+                    Tổng số câu:
                   </span>
                   <span className="text-2xl font-bold text-gray-900">
                     {results.total}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3">
-                  <span className="text-gray-600 font-medium">Time Spent:</span>
+                  <span className="text-gray-600 font-medium">Thời gian làm bài:</span>
                   <span className="text-xl font-semibold text-blue-600">
                     {timeSpentMinutes}m {timeSpentSeconds}s
                   </span>
@@ -178,19 +158,19 @@ export default function QuizResultsPage() {
             href={`/quiz/${params.id}`}
             className="flex-1 bg-blue-600 text-white text-center py-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
           >
-            Retake Quiz
+            Làm lại bài kiểm tra
           </Link>
           <Link
             href="/quiz"
             className="flex-1 bg-gray-100 text-gray-700 text-center py-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
           >
-            Browse More Quizzes
+            Xem thêm bài kiểm tra
           </Link>
           <Link
             href="/quiz/history"
             className="flex-1 border-2 border-blue-600 text-blue-600 text-center py-4 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
           >
-            View History
+            Xem lịch sử làm bài
           </Link>
         </div>
 

@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Quiz, Question } from "@/types/admin/admin";
 import { formatDate } from "@/utils/admin";
+import { getQuizById } from "@/api/quiz";
+import { deleteQuestion } from "@/api/questions";
+import { mapOptions } from "@/utils/questionUtils";
 import StatusBadge from "@/components/admin/common/StatusBadge";
 import ActionButton from "@/components/admin/common/ActionButton";
 import QuestionModal from "@/components/admin/quizzes/QuestionModal";
@@ -21,34 +24,29 @@ export default function QuizDetailPage() {
   );
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const mockQuiz: Quiz = {
-      id: quizId,
-      title: "JavaScript Basics",
-      description: "Test your knowledge of JavaScript fundamentals.",
-      category: { id: 1, name: "Programming" },
-      difficulty: "Beginner",
-      duration: 30,
-      questions_count: 10,
-      learning_objectives: ["Understand variables", "Learn functions"],
-      prerequisites: ["Basic HTML", "Basic CSS"],
-      tags: ["JavaScript", "Programming", "Basics"],
-      passing_score: 70,
-      max_attempts: 3,
-      color: "#3B82F6",
-      status: "published",
-      created_at: "2024-01-01T12:00:00Z",
-      updated_at: "2024-07-20T14:30:00Z",
-      enrollment_count: 100,
-      last_attempt_date: "2024-07-19T10:00:00Z",
+    const fetchQuiz = async () => {
+      if (Number.isNaN(quizId)) {
+        setError("Invalid quiz id.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const data = await getQuizById(quizId);
+        setQuiz(data);
+        setQuestions(data?.questions ?? []);
+      } catch (err) {
+        console.error("Failed to load quiz details:", err);
+        setError("Failed to load quiz details. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const mockQuestions: Question[] = [];
-
-    setQuiz(mockQuiz);
-    setQuestions(mockQuestions);
-    setIsLoading(false);
+    fetchQuiz();
   }, [quizId]);
 
   const handleAddQuestion = () => {
@@ -63,9 +61,15 @@ export default function QuizDetailPage() {
     setIsQuestionModalOpen(true);
   };
 
-  const handleDeleteQuestion = (question: Question) => {
+  const handleDeleteQuestion = async (question: Question) => {
     if (confirm(`Are you sure you want to delete this question?`)) {
-      setQuestions((prev) => prev.filter((q) => q.id !== question.id));
+      try {
+        await deleteQuestion(question.id);
+        setQuestions((prev) => prev.filter((q) => q.id !== question.id));
+      } catch (error) {
+        console.error("Failed to delete question:", error);
+        alert("Failed to delete question. Please try again.");
+      }
     }
   };
 
@@ -73,10 +77,26 @@ export default function QuizDetailPage() {
     router.push("/admin/quizzes");
   };
 
-  if (isLoading || !quiz) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!quiz) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4 text-center">
+        <p className="text-lg font-semibold text-gray-800">
+          {error ?? "Quiz not found."}
+        </p>
+        <button
+          onClick={handleBackToList}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Back to quizzes
+        </button>
       </div>
     );
   }
@@ -143,21 +163,19 @@ export default function QuizDetailPage() {
           <nav className="flex space-x-8 px-6">
             <button
               onClick={() => setActiveTab("info")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === "info"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === "info"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
             >
               Quiz Information
             </button>
             <button
               onClick={() => setActiveTab("questions")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === "questions"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === "questions"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
             >
               Questions ({questions.length})
             </button>
@@ -339,43 +357,61 @@ export default function QuizDetailPage() {
                         </div>
 
                         <h4 className="text-lg font-medium text-gray-900 mb-3">
-                          {question.question_text}
+                          {question.content || "No question text provided"}
                         </h4>
 
-                        {question.options && (
+                        {question.type === "multiple_choice" && question.options && (
                           <div className="space-y-2 mb-3">
-                            {question.options.map((option, optionIndex) => (
+                            {Object.entries(
+                              mapOptions(Object.values(question.options))
+                            ).map(([optionKey, optionValue]) => (
                               <div
-                                key={optionIndex}
-                                className={`flex items-center space-x-2 p-2 rounded ${
-                                  question.correct_answers.includes(option)
-                                    ? "bg-green-50 border border-green-200"
-                                    : "bg-gray-50"
-                                }`}
+                                key={optionKey}
+                                className={`flex items-center space-x-2 p-2 rounded ${question.answer?.includes(optionKey) ||
+                                  question.answer?.includes(optionValue)
+                                  ? "bg-green-50 border border-green-200"
+                                  : "bg-gray-50"
+                                  }`}
                               >
                                 <span className="text-sm font-medium text-gray-600">
-                                  {String.fromCharCode(65 + optionIndex)}.
+                                  {optionKey}.
                                 </span>
                                 <span className="text-sm text-gray-800">
-                                  {option}
+                                  {optionValue}
                                 </span>
-                                {question.correct_answers.includes(option) && (
-                                  <svg
-                                    className="w-4 h-4 text-green-600"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M5 13l4 4L19 7"
-                                    />
-                                  </svg>
-                                )}
+                                {(question.answer?.includes(optionKey) ||
+                                  question.answer?.includes(optionValue)) && (
+                                    <svg
+                                      className="w-4 h-4 text-green-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                  )}
                               </div>
                             ))}
+                          </div>
+                        )}
+
+                        {question.type !== "multiple_choice" && question.answer && (
+                          <div className="mb-3">
+                            <span className="text-sm font-medium text-gray-700">
+                              {question.type === "true_false"
+                                ? "Correct answer:"
+                                : "Answers:"}
+                            </span>
+                            <div className="mt-1 text-sm text-gray-800">
+                              {Array.isArray(question.answer)
+                                ? question.answer.join(", ")
+                                : question.answer}
+                            </div>
                           </div>
                         )}
 
@@ -449,13 +485,16 @@ export default function QuizDetailPage() {
                 order: questions.length + 1,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                question_text: questionData.question_text ?? "",
+                content: questionData.content ?? "",
                 type: questionData.type ?? "multiple_choice",
-                options: questionData.options ?? [],
-                correct_answers: questionData.correct_answers ?? [],
+                options: questionData.options ?? {},
+                answer: Array.isArray(questionData.answer)
+                  ? questionData.answer
+                  : questionData.answer
+                    ? [questionData.answer]
+                    : [],
                 explanation: questionData.explanation ?? "",
                 points: questionData.points ?? 1,
-                order_index: 0,
               };
               setQuestions((prev) => [...prev, newQuestion]);
             } else {
@@ -463,10 +502,10 @@ export default function QuizDetailPage() {
                 prev.map((q) =>
                   q.id === selectedQuestion?.id
                     ? {
-                        ...q,
-                        ...questionData,
-                        updated_at: new Date().toISOString(),
-                      }
+                      ...q,
+                      ...questionData,
+                      updated_at: new Date().toISOString(),
+                    }
                     : q
                 )
               );

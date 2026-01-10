@@ -1,4 +1,5 @@
 import { Category } from "./category";
+import { Question } from "./question";
 
 export interface Exam {
   id: number;
@@ -46,5 +47,52 @@ export interface QuizHistoryItem {
     category: string;
     difficulty: "Beginner" | "Intermediate" | "Advanced";
   };
+}
+
+// AI Quiz Generation Types
+export interface TextPromptRequest {
+  prompt: string;
+  number_of_questions?: number;
+}
+
+export interface FileUploadRequest {
+  file: File;
+  number_of_questions?: number;
+}
+
+export interface AIQuizResponse {
+  id: number;
+  title: string;
+  description: string;
+  category_id: number;
+  difficulty: string;
+  duration: number;
+  status: 'draft';
+  is_ai_generated: true;
+  questions: Question[];
+}
+
+export interface AIQuizFormData {
+  mode: 'text' | 'file';
+  prompt?: string;
+  file?: File;
+  numberOfQuestions: number;
+}
+
+// User Quiz Submission Types
+export interface UserQuizSubmission {
+  id: number;
+  title: string;
+  description: string;
+  category_id: number;
+  difficulty: string;
+  duration: number;
+  status: 'pending' | 'approved' | 'rejected';
+  is_ai_generated: true;
+  questions: Question[];
+  submitted_at: string;
+  reviewed_at?: string;
+  reviewer_notes?: string;
+  user_id: number;
 }
 

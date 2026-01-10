@@ -11,11 +11,11 @@ interface FilterTabsProps {
 }
 
 const tabs: { key: TabKey; label: string; color?: string; soon?: boolean }[] = [
-    { key: "all", label: "All" },
+    { key: "all", label: "Tất cả" },
     { key: "quiz", label: "Quizzes", color: "text-blue-600" },
-    { key: "course", label: "Courses", color: "text-green-600", soon: true },
-    { key: "video", label: "Videos", color: "text-purple-600", soon: true },
-    { key: "document", label: "Documents", color: "text-orange-600", soon: true },
+    { key: "course", label: "Khóa học", color: "text-green-600", soon: true },
+    { key: "video", label: "Video", color: "text-purple-600", soon: true },
+    { key: "document", label: "Tài liệu", color: "text-orange-600", soon: true },
 ];
 
 export default function FilterTabs({ active, onChange, className }: FilterTabsProps) {

@@ -2,7 +2,7 @@ import { axiosAPI } from "./axios";
 
 // Gửi đánh giá mới
 export const createRating = async (
-    type: "quiz" | "post" | "news",
+    type: "quiz" | "post" | "news" | "document",
     id: number,
     data: { stars: number; comment?: string },
     token: string
@@ -14,7 +14,7 @@ export const createRating = async (
 
 // Lấy đánh giá hiện tại của user
 export const getMyRating = async (
-    type: "quiz" | "post" | "news",
+    type: "quiz" | "post" | "news" | "document",
     id: number,
     token: string
 ) => {
@@ -26,7 +26,7 @@ export const getMyRating = async (
 
 // Lấy tất cả đánh giá của một item
 export const getRatings = async (
-    type: "quiz" | "post" | "news",
+    type: "quiz" | "post" | "news" | "document",
     id: number,
     page: number = 1,
     limit: number = 10
@@ -38,7 +38,7 @@ export const getRatings = async (
 
 // Lấy thống kê ratings
 export const getRatingStats = async (
-    type: "quiz" | "post" | "news",
+    type: "quiz" | "post" | "news" | "document",
     id: number
 ) => {
     return axiosAPI.get("/ratings/stats", {

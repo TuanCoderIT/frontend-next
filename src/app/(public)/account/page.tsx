@@ -170,7 +170,7 @@ export default function UserProfilePage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your profile...</p>
+          <p className="text-gray-600">Đang tải thông tin của bạn...</p>
         </div>
       </div>
     );
@@ -181,7 +181,7 @@ export default function UserProfilePage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-600">Failed to load profile</p>
+          <p className="text-gray-600">Không thể tải thông tin của bạn</p>
         </div>
       </div>
     );
@@ -201,10 +201,10 @@ export default function UserProfilePage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            My <span className="text-blue-600">Profile</span>
+            My <span className="text-blue-600">Trang cá nhân</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Manage your account settings and track your learning progress
+            Quản lý cài đặt tài khoản và theo dõi tiến trình học tập của bạn
           </p>
         </div>
 
@@ -243,7 +243,7 @@ export default function UserProfilePage() {
 
               {/* Personal Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin cá nhân</h3>
 
                 {profile.bio && (
                   <div className="text-sm text-gray-600">
@@ -255,7 +255,7 @@ export default function UserProfilePage() {
                   {profile.date_of_birth && (
                     <div className="flex items-center text-sm">
                       <Calendar className="h-4 w-4 text-gray-400 mr-3" />
-                      <span className="text-gray-600">Born:</span>
+                      <span className="text-gray-600">Ngày sinh:</span>
                       <span className="ml-2 text-gray-900">{formatDate(profile.date_of_birth)}</span>
                     </div>
                   )}
@@ -263,7 +263,7 @@ export default function UserProfilePage() {
                   {profile.gender && (
                     <div className="flex items-center text-sm">
                       <User className="h-4 w-4 text-gray-400 mr-3" />
-                      <span className="text-gray-600">Gender:</span>
+                      <span className="text-gray-600">Giới tính:</span>
                       <span className="ml-2 text-gray-900 capitalize">{profile.gender}</span>
                     </div>
                   )}
@@ -271,7 +271,7 @@ export default function UserProfilePage() {
                   {profile.phone_number && (
                     <div className="flex items-center text-sm">
                       <Phone className="h-4 w-4 text-gray-400 mr-3" />
-                      <span className="text-gray-600">Phone:</span>
+                      <span className="text-gray-600">Số điện thoại:</span>
                       <span className="ml-2 text-gray-900">{profile.phone_number}</span>
                     </div>
                   )}
@@ -283,7 +283,7 @@ export default function UserProfilePage() {
                     className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center"
                   >
                     <Edit3 className="h-4 w-4 mr-2" />
-                    {isEditing ? "Cancel Edit" : "Edit Profile"}
+                    {isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa thông tin cá nhân"}
                   </button>
                 </div>
               </div>
@@ -293,13 +293,13 @@ export default function UserProfilePage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <Lock className="h-5 w-5 mr-2" />
-                Security
+                Bảo mật
               </h3>
               <button
                 onClick={() => setIsChangingPassword(!isChangingPassword)}
                 className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
               >
-                Change Password
+                Thay đổi mật khẩu
               </button>
             </div>
           </div>
@@ -310,7 +310,7 @@ export default function UserProfilePage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                 <TrendingUp className="h-6 w-6 mr-2 text-blue-600" />
-                Learning Statistics
+                Thống kê học tập
               </h3>
               {userProfile && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -319,7 +319,7 @@ export default function UserProfilePage() {
                     <div className="text-2xl font-bold text-blue-600">
                       {userProfile.total_quizzes_completed || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Quizzes Completed</div>
+                    <div className="text-sm text-gray-600">Bài kiểm tra hoàn thành</div>
                   </div>
 
                   <div className="text-center p-4 bg-green-50 rounded-xl">
@@ -327,7 +327,7 @@ export default function UserProfilePage() {
                     <div className="text-2xl font-bold text-green-600">
                       {userProfile.average_accuracy || 0}%
                     </div>
-                    <div className="text-sm text-gray-600">Average Accuracy</div>
+                    <div className="text-sm text-gray-600">Độ chính xác trung bình</div>
                   </div>
 
                   <div className="text-center p-4 bg-purple-50 rounded-xl">
@@ -335,7 +335,7 @@ export default function UserProfilePage() {
                     <div className="text-2xl font-bold text-purple-600">
                       {formatTime(userProfile.total_learning_time || 0)}
                     </div>
-                    <div className="text-sm text-gray-600">Total Learning Time</div>
+                    <div className="text-sm text-gray-600">Tổng thời gian học tập</div>
                   </div>
 
                   <div className="text-center p-4 bg-yellow-50 rounded-xl">
@@ -343,7 +343,7 @@ export default function UserProfilePage() {
                     <div className="text-2xl font-bold text-yellow-600">
                       {profile.achievements?.length || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Achievements</div>
+                    <div className="text-sm text-gray-600">Thành tựu</div>
                   </div>
                 </div>
               )}
@@ -353,7 +353,7 @@ export default function UserProfilePage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                 <Award className="h-6 w-6 mr-2 text-blue-600" />
-                Recent Quiz History
+                Lịch sử bài kiểm tra gần nhất
               </h3>
 
               <div className="space-y-4">
@@ -379,8 +379,8 @@ export default function UserProfilePage() {
                 {quizHistory.length === 0 && (
                   <div className="text-center py-8">
                     <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No quiz history yet</p>
-                    <p className="text-sm text-gray-500">Start taking quizzes to see your progress here</p>
+                    <p className="text-gray-600">Không có lịch sử bài kiểm tra</p>
+                    <p className="text-sm text-gray-500">Bắt đầu làm bài kiểm tra để xem tiến trình của bạn</p>
                   </div>
                 )}
               </div>
@@ -394,7 +394,7 @@ export default function UserProfilePage() {
             <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Edit Profile</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">Chỉnh sửa thông tin cá nhân</h3>
                   <button
                     onClick={() => setIsEditing(false)}
                     className="text-gray-400 hover:text-gray-600"
@@ -412,7 +412,7 @@ export default function UserProfilePage() {
                 <form onSubmit={handleProfileSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormInput
-                      label="Full Name"
+                      label="Họ và tên"
                       name="name"
                       type="text"
                       value={profileForm.name ?? ""}
@@ -422,20 +422,20 @@ export default function UserProfilePage() {
                       icon={<User className="h-5 w-5" />}
                     />
                     <FormSelect
-                      label="Gender"
+                      label="Giới tính"
                       name="gender"
                       options={[
-                        { label: "Select Gender", value: "" },
-                        { label: "Male", value: "male" },
-                        { label: "Female", value: "female" },
-                        { label: "Other", value: "other" }
+                        { label: "Chọn giới tính", value: "" },
+                        { label: "Nam", value: "male" },
+                        { label: "Nữ", value: "female" },
+                        { label: "Khác", value: "other" }
                       ]}
                       value={profileForm.gender ?? ""}
                       onChange={(e) => setProfileForm(prev => ({ ...prev, gender: e.target.value }))}
                       error={errors.gender}
                     />
                     <FormInput
-                      label="Date of Birth"
+                      label="Ngày sinh"
                       name="date_of_birth"
                       type="date"
                       value={profileForm.date_of_birth ?? ""}
@@ -444,7 +444,7 @@ export default function UserProfilePage() {
                       icon={<Calendar className="h-5 w-5" />}
                     />
                     <FormInput
-                      label="Phone Number"
+                      label="Số điện thoại"
                       name="phone_number"
                       type="tel"
                       value={profileForm.phone_number ?? ""}
@@ -454,12 +454,12 @@ export default function UserProfilePage() {
                     />
                   </div>
                   <FormTextarea
-                    label="Bio"
+                    label="Giới thiệu"
                     name="bio"
                     value={profileForm.bio ?? ""}
                     onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
                     error={errors.bio}
-                    placeholder="Tell us about yourself..."
+                    placeholder="Nói về bản thân..."
                   />
 
                   <div className="flex justify-end space-x-3 pt-4">
@@ -468,14 +468,14 @@ export default function UserProfilePage() {
                       onClick={() => setIsEditing(false)}
                       className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                      Cancel
+                      Hủy
                     </button>
                     <button
                       type="submit"
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      Save Changes
+                      Lưu thay đổi
                     </button>
                   </div>
                 </form>
@@ -490,7 +490,7 @@ export default function UserProfilePage() {
             <div className="bg-white rounded-2xl max-w-md w-full">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Change Password</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">Thay đổi mật khẩu</h3>
                   <button
                     onClick={() => setIsChangingPassword(false)}
                     className="text-gray-400 hover:text-gray-600"
@@ -507,7 +507,7 @@ export default function UserProfilePage() {
 
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
                   <FormInput
-                    label="Current Password"
+                    label="Mật khẩu hiện tại"
                     name="current_password"
                     type="password"
                     value={passwordForm.current_password ?? ""}
@@ -516,7 +516,7 @@ export default function UserProfilePage() {
                     icon={<LockKeyholeOpen className="h-5 w-5" />}
                   />
                   <FormInput
-                    label="New Password"
+                    label="Mật khẩu mới"
                     name="new_password"
                     type="password"
                     value={passwordForm.new_password ?? ""}
@@ -525,7 +525,7 @@ export default function UserProfilePage() {
                     icon={<LockKeyhole className="h-5 w-5" />}
                   />
                   <FormInput
-                    label="Confirm New Password"
+                    label="Xác nhận mật khẩu mới"
                     name="new_password_confirmation"
                     type="password"
                     value={passwordForm.new_password_confirmation ?? ""}
@@ -540,13 +540,13 @@ export default function UserProfilePage() {
                       onClick={() => setIsChangingPassword(false)}
                       className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                      Cancel
+                      Hủy
                     </button>
                     <button
                       type="submit"
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      Change Password
+                      Thay đổi mật khẩu
                     </button>
                   </div>
                 </form>

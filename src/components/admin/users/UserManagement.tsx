@@ -17,6 +17,7 @@ import AdminBreadcrumb from "../common/AdminBreadcrumb";
 import { axiosAPI } from "@/api/axios";
 import { deleteUser } from "@/api/users";
 import { DataLoading } from "@/components/common/LoadingScreen";
+import Pagination from "@/components/common/Pagination";
 
 export default function UserManagement() {
   const router = useRouter();
@@ -26,6 +27,8 @@ export default function UserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -70,6 +73,15 @@ export default function UserManagement() {
 
     setFilteredUsers(filtered);
   }, [users, filters]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, pageSize]);
+
+  const paginatedUser = filteredUsers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handleSearch = (query: string) => {
     setFilters((prev) => ({ ...prev, search: query }));
@@ -189,7 +201,7 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
+              {paginatedUser.map((user) => (
                 <tr
                   key={user.id}
                   className="hover:bg-gray-50 transition-colors duration-150"
@@ -253,6 +265,18 @@ export default function UserManagement() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="px-4 py-3 border-t border-gray-200">
+          <Pagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={filteredUsers.length}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            pageSizeOptions={[5, 10, 20]}
+          />
         </div>
 
         {filteredUsers.length === 0 && (

@@ -120,7 +120,7 @@ export default function AdminHeader() {
                     <Link href={'/admin/profile'} className="text-sm font-medium text-gray-700">
                       {user?.name}
                     </Link>
-                    <p className="text-xs text-gray-500">Quản trị viên</p>
+                    <p className="text-xs text-gray-500">Admin</p>
                   </div>
                 </>
               ) : ("")}

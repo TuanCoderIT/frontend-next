@@ -8,11 +8,11 @@ import SearchBar from "@/components/admin/common/SearchBar";
 import FilterSelect from "@/components/admin/common/FilterSelect";
 import ActionButton from "@/components/admin/common/ActionButton";
 import StatusBadge from "@/components/admin/common/StatusBadge";
-import { ClipboardList, NotebookPen, Plus } from "lucide-react";
+import { CircleUserRound, ClipboardList, NotebookPen, Plus } from "lucide-react";
 import CustomLink from "../common/CustomLink";
 import PageHeader from "../common/PageHeader";
 import AdminBreadcrumb from "../common/AdminBreadcrumb";
-import { getQuizzes } from "@/api/quiz";
+import { getQuizzes, deleteQuiz } from "@/api/quiz";
 import Pagination from "@/components/common/Pagination";
 import { DataLoading } from "@/components/common/LoadingScreen";
 
@@ -25,11 +25,9 @@ export default function QuizManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Mock data - Replace with actual API calls
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        // Replace with actual API call
         const response = await getQuizzes();
         setQuizzes(response);
         setFilteredQuizzes(response);
@@ -115,9 +113,16 @@ export default function QuizManagement() {
     }));
   };
 
-  const handleDeleteQuiz = (quiz: Quiz) => {
+  const handleDeleteQuiz = async (quiz: Quiz) => {
     if (window.confirm(`Are you sure you want to delete "${quiz.title}"?`)) {
-      setQuizzes((prev) => prev.filter((q) => q.id !== quiz.id));
+      try {
+        await deleteQuiz(quiz.id);
+        // Chỉ xóa khỏi state sau khi API thành công
+        setQuizzes((prev) => prev.filter((q) => q.id !== quiz.id));
+      } catch (error) {
+        console.error("Failed to delete quiz:", error);
+        alert("Failed to delete quiz. Please try again.");
+      }
     }
   };
 
@@ -163,15 +168,43 @@ export default function QuizManagement() {
       {/* Breadcrumb */}
       <AdminBreadcrumb currentPage="Quizzes Management" />
       {/* Header */}
-      <PageHeader
-        title="Quizzes Management"
-        icon={<NotebookPen />}
-        actionLabel="Add new quiz"
-        actionHref="/admin/quizzes/add"
-        actionIcon={<Plus />}
-        bgGradient="from-green-50 to-emerald-50"
-        buttonGradient="from-green-500 to-emerald-600"
-      />
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+              <NotebookPen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Quizzes Management</h1>
+              <p className="text-gray-600">Manage and create quizzes for your platform</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            {/* AI Quiz Button */}
+            <button
+              onClick={() => window.location.href = '/admin/ai-quiz'}
+              className="group relative px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-700 focus:outline-none focus:ring-4 focus:ring-purple-300 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span>AI Quiz</span>
+              </div>
+            </button>
+
+            {/* Regular Add Button */}
+            <button
+              onClick={() => router.push('/admin/quizzes/add')}
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              title="Add New Quiz"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add Quiz
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
