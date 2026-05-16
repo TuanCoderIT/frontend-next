@@ -210,7 +210,7 @@ export default function AdminCoursesPage() {
                             Course Management
                         </h1>
                         <p className="text-sm text-gray-500">
-                            Monitor, create, and curate courses for your learners.
+                            View, create, and update courses for your learners.
                         </p>
                     </div>
                 </div>

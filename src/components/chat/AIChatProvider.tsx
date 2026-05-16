@@ -1,7 +1,7 @@
 "use client";
 
 import AIChatFloatingButton from "./AIChatFloatingButton";
-import type { AIChatContext } from "@/types/ai-chat";
+import type { AIChatContext } from "@/types/public/ai-chat";
 
 interface AIChatProviderProps {
   context?: AIChatContext;
@@ -9,17 +9,15 @@ interface AIChatProviderProps {
   children: React.ReactNode;
 }
 
-export default function AIChatProvider({ 
-  context = { type: "general" }, 
+export default function AIChatProvider({
+  context = { type: "general" },
   showFloatingButton = true,
-  children 
+  children,
 }: AIChatProviderProps) {
   return (
     <>
       {children}
-      {showFloatingButton && (
-        <AIChatFloatingButton context={context} />
-      )}
+      {showFloatingButton && <AIChatFloatingButton context={context} />}
     </>
   );
 }

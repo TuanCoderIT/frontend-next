@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { aiAssistantApi } from "@/api/aiAssistant";
-import type { AIChatMessage, AIChatContext, AIChatState } from "@/types/ai-chat";
+import type { AIChatMessage, AIChatContext, AIChatState } from "@/types/public/ai-chat";
 
 const MAX_MESSAGES = 50;
 

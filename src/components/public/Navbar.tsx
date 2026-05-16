@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import NotificationBell from "@/components/common/NotificationBell";
 export default function Navbar() {
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -107,8 +108,12 @@ export default function Navbar() {
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
             {user ? (
-              // Hiển thị khi đã đăng nhập
-              <div className="relative" ref={dropdownRef}>
+              <>
+                {/* Notification Bell */}
+                <NotificationBell />
+                
+                {/* User Dropdown */}
+                <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
@@ -172,7 +177,8 @@ export default function Navbar() {
                     </button>
                   </div>
                 )}
-              </div>
+                </div>
+              </>
             ) : (
               // Hiển thị khi chưa đăng nhập
               <>

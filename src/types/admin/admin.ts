@@ -83,3 +83,10 @@ export interface CategoryFilters {
   search?: string;
   is_active?: string;
 }
+
+export interface FlashcardSetFilters {
+  status?: string;
+  source_type?: string;
+  search?: string;
+  category?: string;
+}

@@ -4,7 +4,8 @@ import { axiosAPI } from "@/api/axios";
 // GET all categories
 export const getCategories = async (params: Record<string, any> = {}) => {
     const res = await axiosAPI.get("/admin/categories", { params });
-    return res.data;
+    // Laravel Resource usually wraps in 'data'
+    return res.data.data || res.data;
 };
 
 // CREATE category

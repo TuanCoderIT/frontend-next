@@ -3,43 +3,47 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Quiz, QuizFilters } from "@/types/admin/admin";
-import { formatDate } from "@/utils/admin";
 import SearchBar from "@/components/admin/common/SearchBar";
 import FilterSelect from "@/components/admin/common/FilterSelect";
 import ActionButton from "@/components/admin/common/ActionButton";
 import StatusBadge from "@/components/admin/common/StatusBadge";
-import { CircleUserRound, ClipboardList, NotebookPen, Plus } from "lucide-react";
+import { ClipboardList, NotebookPen, Plus } from "lucide-react";
 import CustomLink from "../common/CustomLink";
-import PageHeader from "../common/PageHeader";
 import AdminBreadcrumb from "../common/AdminBreadcrumb";
 import { getQuizzes, deleteQuiz } from "@/api/quiz";
+import { getCategories } from "@/api/categories";
 import Pagination from "@/components/common/Pagination";
 import { DataLoading } from "@/components/common/LoadingScreen";
+import { Category } from "@/types/admin/admin";
 
 export default function QuizManagement() {
   const router = useRouter();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [filteredQuizzes, setFilteredQuizzes] = useState<Quiz[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [filters, setFilters] = useState<QuizFilters>({});
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    const fetchQuizzes = async () => {
+    const fetchInitialData = async () => {
       try {
-        const response = await getQuizzes();
-        setQuizzes(response);
-        setFilteredQuizzes(response);
-        console.log(response);
+        const [quizzesResponse, categoriesResponse] = await Promise.all([
+          getQuizzes(),
+          getCategories()
+        ]);
+        setQuizzes(quizzesResponse);
+        setFilteredQuizzes(quizzesResponse);
+        setCategories(categoriesResponse);
       } catch (error) {
-        console.error("Failed to fetch quizzes:", error);
+        console.error("Failed to fetch initial data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchQuizzes();
+    fetchInitialData();
   }, []);
 
   // Filter quizzes based on search and filters
@@ -126,13 +130,10 @@ export default function QuizManagement() {
     }
   };
 
-  const categoryOptions = [
-    { value: "Programming", label: "Programming" },
-    { value: "Database", label: "Database" },
-    { value: "Mathematics", label: "Mathematics" },
-    { value: "Science", label: "Science" },
-    { value: "Languages", label: "Languages" },
-  ];
+  const categoryOptions = categories.map((cat) => ({
+    value: cat.name,
+    label: cat.name,
+  }));
 
   const difficultyOptions = [
     { value: "Beginner", label: "Beginner" },

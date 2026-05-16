@@ -11,10 +11,10 @@ import { Category } from "@/types/public/category";
 interface QuizFormData {
   title: string;
   description: string;
-  category: Category;
-  difficulty: "Beginner" | "Intermediate" | "Advanced" | "";
+  category: Category; 
+  difficulty: "Cơ bản" | "Trung bình" | "Nâng cao" | "";
   duration: number;
-  status: "Draft" | "Published" | "Archived" | "";
+  status: "Nháp" | "Công khai" | "Lưu trữ" | "";
   passingScore: number;
   maxAttempts: number;
   learning_objectives: string[];
@@ -42,7 +42,7 @@ export default function QuizForm({
     category: initialData?.category || { id: 0, name: "" },
     difficulty: initialData?.difficulty || "",
     duration: initialData?.duration || 30,
-    status: initialData?.status || "Draft",
+    status: initialData?.status || "Nháp",
     passingScore: initialData?.passingScore || 70,
     maxAttempts: initialData?.maxAttempts || 3,
     learning_objectives: initialData?.learning_objectives || [],
@@ -164,7 +164,7 @@ export default function QuizForm({
                   error={errors.difficulty}
                   required
                   options={[
-                    { label: "Beginner", value: "Beginner" },
+                    { label: "Cơ bản", value: "Cơ bản" },
                     { label: "Intermediate", value: "Intermediate" },
                     { label: "Advanced", value: "Advanced" },
                   ]}
@@ -340,9 +340,9 @@ export default function QuizForm({
                   <p>
                     <span className="font-medium">Status:</span>
                     <span
-                      className={`ml-2 px-2 py-1 rounded-full text-xs ${formData.status === "Published"
+                      className={`ml-2 px-2 py-1 rounded-full text-xs ${formData.status === "Công khai"
                         ? "bg-green-100 text-green-800"
-                        : formData.status === "Draft"
+                        : formData.status === "Nháp"
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-gray-100 text-gray-800"
                         }`}
@@ -372,9 +372,9 @@ export default function QuizForm({
                   Saving...
                 </div>
               ) : mode === "edit" ? (
-                "Update Quiz"
+                "Cập nhật bài thi"
               ) : (
-                "Save Quiz"
+                "Lưu bài thi"
               )}
             </button>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState } from "react";
+import React, { use, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -11,12 +11,28 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import NotificationBell from "@/components/common/NotificationBell";
 
 export default function AdminHeader() {
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const { user, logout } = useAuth();
+  
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to close dropdowns
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-white shadow-sm z-20">
@@ -37,65 +53,8 @@ export default function AdminHeader() {
 
         {/* Right: Actions */}
         <div className="flex items-center space-x-3">
-          {/* Notification button */}
-          <div className="relative">
-            <button
-              className="p-1.5 text-gray-500 rounded-lg hover:bg-gray-100 relative"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
-              <Bell className="h-6 w-6" />
-              <span className="absolute right-0 top-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-
-            {/* Notification dropdown */}
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-30">
-                <div className="p-4 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Notifications
-                    </h3>
-                    <button className="text-xs text-blue-600 hover:text-blue-800">
-                      Mark all as read
-                    </button>
-                  </div>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {[1, 2, 3, 4, 5].map((item) => (
-                    <a
-                      key={item}
-                      href="#"
-                      className="block p-4 border-b border-gray-100 hover:bg-gray-50 transition duration-150 ease-in-out"
-                    >
-                      <div className="flex">
-                        <div className="shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <BellRing className="h-5 w-5 text-blue-600" />
-                          </div>
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium text-gray-900">
-                            {item % 2 === 0
-                              ? "New register user successful"
-                              : "New comment in quiz"}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {item} hours ago
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-                <a
-                  href="#"
-                  className="block text-center text-sm text-blue-600 font-medium p-4 hover:bg-gray-50"
-                >
-                  See all notifications
-                </a>
-              </div>
-            )}
-          </div>
+          {/* Notification Bell */}
+          <NotificationBell />
 
           {/* Messages button */}
           <button className="p-1.5 text-gray-500 rounded-lg hover:bg-gray-100">
@@ -103,8 +62,11 @@ export default function AdminHeader() {
           </button>
 
           {/* User profile */}
-          <div className="relative inline-block">
-            <button className="flex items-center space-x-3">
+          <div className="relative inline-block" ref={userDropdownRef}>
+            <button 
+              className="flex items-center space-x-3"
+              onClick={() => setShowUserDropdown(!showUserDropdown)}
+            >
               {user ? (
                 <>
                   <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
@@ -117,14 +79,57 @@ export default function AdminHeader() {
                     )}
                   </div>
                   <div className="hidden md:block text-left">
-                    <Link href={'/admin/profile'} className="text-sm font-medium text-gray-700">
+                    <div className="text-sm font-medium text-gray-700">
                       {user?.name}
-                    </Link>
+                    </div>
                     <p className="text-xs text-gray-500">Admin</p>
                   </div>
                 </>
               ) : ("")}
             </button>
+
+            {/* User dropdown */}
+            {showUserDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-30">
+                <div className="py-1">
+                  <Link
+                    href="/admin/profile"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Hồ sơ cá nhân
+                  </Link>
+                  <Link
+                    href="/admin/settings"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Cài đặt
+                  </Link>
+                  <div className="border-t border-gray-100"></div>
+                  <button
+                    onClick={async () => {
+                      setShowUserDropdown(false);
+                      await logout();
+                      window.location.href = '/auth/login';
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Đăng xuất
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -175,6 +180,20 @@ export default function AdminHeader() {
             >
               Cài đặt
             </a>
+            <div className="border-t border-gray-200 my-2"></div>
+            <button
+              onClick={async () => {
+                setShowMobileMenu(false);
+                await logout();
+                window.location.href = '/auth/login';
+              }}
+              className="flex items-center w-full py-2 px-3 text-base font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Đăng xuất
+            </button>
           </div>
         </div>
       )}

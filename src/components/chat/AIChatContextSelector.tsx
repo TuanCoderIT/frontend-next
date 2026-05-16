@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, BookOpen, FileText, MessageCircle } from "lucide-react";
-import type { AIChatContext } from "@/types/ai-chat";
+import type { AIChatContext } from "@/types/public/ai-chat";
 
 interface AIChatContextSelectorProps {
   currentContext: AIChatContext;
@@ -36,10 +36,7 @@ export default function AIChatContextSelector({
     }
   };
 
-  const allContexts = [
-    { type: "general" as const },
-    ...availableContexts,
-  ];
+  const allContexts = [{ type: "general" as const }, ...availableContexts];
 
   return (
     <div className="relative">
@@ -48,7 +45,7 @@ export default function AIChatContextSelector({
         onChange={(e) => {
           const [type, id] = e.target.value.split("-");
           const selectedContext = allContexts.find(
-            (ctx) => ctx.type === type && (ctx.id?.toString() || "") === id
+            (ctx) => ctx.type === type && (ctx.id?.toString() || "") === id,
           );
           if (selectedContext) {
             onContextChange(selectedContext);

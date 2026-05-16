@@ -4,26 +4,21 @@ import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import AIChatWindow from "./AIChatWindow";
 import { useAIChat } from "@/hooks/useAIChat";
-import type { AIChatContext } from "@/types/ai-chat";
+import type { AIChatContext } from "@/types/public/ai-chat";
 
 interface AIChatFloatingButtonProps {
   context: AIChatContext;
   className?: string;
 }
 
-export default function AIChatFloatingButton({ 
-  context, 
-  className = "" 
+export default function AIChatFloatingButton({
+  context,
+  className = "",
 }: AIChatFloatingButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
-  const {
-    messages,
-    isLoading,
-    currentContext,
-    sendMessage,
-    updateContext,
-  } = useAIChat(context);
+
+  const { messages, isLoading, currentContext, sendMessage, updateContext } =
+    useAIChat(context);
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -58,11 +53,11 @@ export default function AIChatFloatingButton({
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-end p-4">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black bg-opacity-50"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Chat Window */}
           <div className="relative w-full max-w-md h-[600px] bg-white dark:bg-gray-900 rounded-lg shadow-xl overflow-hidden">
             <AIChatWindow

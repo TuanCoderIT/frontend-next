@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import type { AIChatContext } from "@/types/ai-chat";
+import type { AIChatContext } from "@/types/public/ai-chat";
 
 interface UseAIChatContextProps {
   courseId?: number;

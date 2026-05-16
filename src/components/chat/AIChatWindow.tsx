@@ -5,7 +5,10 @@ import { Bot, Loader2 } from "lucide-react";
 import AIChatMessage from "./AIChatMessage";
 import AIChatInput from "./AIChatInput";
 import AIChatContextSelector from "./AIChatContextSelector";
-import type { AIChatMessage as AIChatMessageType, AIChatContext } from "@/types/ai-chat";
+import type {
+  AIChatMessage as AIChatMessageType,
+  AIChatContext,
+} from "@/types/public/ai-chat";
 
 interface AIChatWindowProps {
   messages: AIChatMessageType[];
@@ -66,7 +69,7 @@ export default function AIChatWindow({
               </p>
             </div>
           </div>
-          
+
           {/* Context Selector */}
           <AIChatContextSelector
             currentContext={currentContext}
