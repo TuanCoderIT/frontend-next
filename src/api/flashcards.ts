@@ -1,16 +1,28 @@
 import { axiosAPI } from "./axios";
-import { Flashcard, FlashcardSet, FlashcardSetStatus } from "@/types/flashcard";
+import {
+  Flashcard,
+  FlashcardPayload,
+  FlashcardSet,
+  FlashcardSetPayload,
+  FlashcardSetStatus,
+} from "@/types/public/flashcard";
 
 /**
  * Laravel Resources usually wrap the response in a 'data' property.
  * This helper ensures we get the actual data regardless of wrapping.
  */
 const unwrap = (response: any) => response.data || response;
+const unwrapList = <T>(response: any): T[] => {
+  const unwrapped = unwrap(response);
+  if (Array.isArray(unwrapped)) return unwrapped;
+  if (Array.isArray(unwrapped?.data)) return unwrapped.data;
+  return [];
+};
 
 // Flashcard Set CRUD
 export const getFlashcardSets = async (): Promise<FlashcardSet[]> => {
   const { data } = await axiosAPI.get("/flashcard-sets");
-  return unwrap(data);
+  return unwrapList<FlashcardSet>(data);
 };
 
 export const getFlashcardSetById = async (id: number): Promise<FlashcardSet> => {
@@ -18,12 +30,12 @@ export const getFlashcardSetById = async (id: number): Promise<FlashcardSet> => 
   return unwrap(data);
 };
 
-export const createFlashcardSet = async (data: any): Promise<FlashcardSet> => {
+export const createFlashcardSet = async (data: FlashcardSetPayload): Promise<FlashcardSet> => {
   const { data: responseData } = await axiosAPI.post("/flashcard-sets", data);
   return unwrap(responseData);
 };
 
-export const updateFlashcardSet = async (id: number, data: any): Promise<FlashcardSet> => {
+export const updateFlashcardSet = async (id: number, data: Partial<FlashcardSetPayload>): Promise<FlashcardSet> => {
   const { data: responseData } = await axiosAPI.put(`/flashcard-sets/${id}`, data);
   return unwrap(responseData);
 };
@@ -38,12 +50,12 @@ export const submitFlashcardSet = async (id: number): Promise<FlashcardSet> => {
 };
 
 // Flashcards (Individual)
-export const createFlashcard = async (setId: number, data: Partial<Flashcard>): Promise<Flashcard> => {
+export const createFlashcard = async (setId: number, data: FlashcardPayload): Promise<Flashcard> => {
   const { data: responseData } = await axiosAPI.post(`/flashcard-sets/${setId}/cards`, data);
   return unwrap(responseData);
 };
 
-export const updateFlashcard = async (cardId: number, data: Partial<Flashcard>): Promise<Flashcard> => {
+export const updateFlashcard = async (cardId: number, data: FlashcardPayload): Promise<Flashcard> => {
   const { data: responseData } = await axiosAPI.put(`/flashcards/${cardId}`, data);
   return unwrap(responseData);
 };
@@ -56,18 +68,18 @@ export const deleteFlashcard = async (cardId: number): Promise<void> => {
 export const updateFlashcardSetStatus = async (
   id: number,
   status: FlashcardSetStatus,
-  review_notes?: string
+  reviewNotes?: string
 ): Promise<FlashcardSet> => {
   const { data } = await axiosAPI.patch(`/flashcard-sets/${id}/status`, {
     status,
-    review_notes,
+    reviewNotes,
   });
   return unwrap(data);
 };
 
 export const getPendingFlashcardSets = async (): Promise<FlashcardSet[]> => {
   const { data } = await axiosAPI.get("/admin/flashcard-sets/pending");
-  return unwrap(data);
+  return unwrapList<FlashcardSet>(data);
 };
 
 export const approveFlashcardSet = async (id: number): Promise<FlashcardSet> => {

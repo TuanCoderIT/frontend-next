@@ -2,21 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Flashcard, 
-  FlashcardSet, 
-  FlashcardSetFormData, 
-  FlashcardSourceType, 
-  FlashcardSetStatus 
-} from "@/types/flashcard";
+import {
+  Flashcard,
+  FlashcardSet,
+  FlashcardSetFormData,
+} from "@/types/public/flashcard";
 import { Category } from "@/types/admin/admin";
 import { getCategories } from "@/api/categories";
-import { 
-  createFlashcardSet, 
-  updateFlashcardSet, 
-  createFlashcard, 
-  updateFlashcard, 
-  deleteFlashcard 
+import {
+  createFlashcardSet,
+  updateFlashcardSet,
+  createFlashcard,
+  updateFlashcard,
+  deleteFlashcard,
 } from "@/api/flashcards";
 import FormInput from "../common/FormInput";
 import FormSelect from "../common/FormSelect";
@@ -29,21 +27,24 @@ interface FlashcardFormProps {
   isEdit?: boolean;
 }
 
-export default function FlashcardForm({ initialData, isEdit = false }: FlashcardFormProps) {
+export default function FlashcardForm({
+  initialData,
+  isEdit = false,
+}: FlashcardFormProps) {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const [formData, setFormData] = useState<FlashcardSetFormData>({
     title: initialData?.title || "",
     description: initialData?.description || "",
-    source_type: initialData?.source_type || "manual",
-    quiz_id: initialData?.exam_id || null,
-    category: initialData?.category || { id: 0, name: "" },
-    color: initialData?.color || "#3b82f6",
+    visibility: initialData?.visibility || "public",
+    sourceType: initialData?.sourceType || "manual",
+    categoryId: initialData?.category?.id || null,
+    examId: initialData?.exam?.id || null,
     status: initialData?.status || "draft",
-    flashcards: initialData?.flashcards || [{ front_text: "", back_text: "", explanation: "" }],
+    cards: initialData?.cards || [{ term: "", definition: "", explanation: "" }],
   });
 
   const [deletedCardIds, setDeletedCardIds] = useState<number[]>([]);
@@ -54,8 +55,8 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
         const data = await getCategories();
         setCategories(data);
         // If creating new set, initialize category to the first one available
-        if (!isEdit && data.length > 0 && formData.category.id === 0) {
-          setFormData(prev => ({ ...prev, category: data[0] }));
+        if (!isEdit && data.length > 0 && !formData.categoryId) {
+          setFormData((prev) => ({ ...prev, categoryId: data[0].id }));
         }
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -66,46 +67,54 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
     fetchCategories();
   }, [isEdit]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCardChange = (index: number, field: keyof Flashcard, value: string) => {
-    const newCards = [...formData.flashcards];
+  const handleCardChange = (
+    index: number,
+    field: keyof Flashcard,
+    value: string,
+  ) => {
+    const newCards = [...formData.cards];
     newCards[index] = { ...newCards[index], [field]: value };
-    setFormData((prev) => ({ ...prev, flashcards: newCards }));
+    setFormData((prev) => ({ ...prev, cards: newCards }));
   };
 
   const addCard = () => {
     setFormData((prev) => ({
       ...prev,
-      flashcards: [...prev.flashcards, { front_text: "", back_text: "", explanation: "" }],
+      cards: [...prev.cards, { term: "", definition: "", explanation: "" }],
     }));
   };
 
   const removeCard = (index: number) => {
-    const cardToRemove = formData.flashcards[index];
+    const cardToRemove = formData.cards[index];
     if (cardToRemove.id) {
       setDeletedCardIds((prev) => [...prev, cardToRemove.id!]);
     }
-    
-    const newCards = formData.flashcards.filter((_, i) => i !== index);
-    setFormData((prev) => ({ ...prev, flashcards: newCards }));
+
+    const newCards = formData.cards.filter((_, i) => i !== index);
+    setFormData((prev) => ({ ...prev, cards: newCards }));
   };
 
   const validate = () => {
     if (!formData.title.trim()) {
-      alert("Title is required");
+      alert("Tiêu đề không được để trống");
       return false;
     }
-    if (formData.flashcards.length === 0) {
-      alert("At least one flashcard is required");
+    if (formData.cards.length === 0) {
+      alert("Vui lòng thêm ít nhất 1 thẻ flashcard");
       return false;
     }
-    for (const card of formData.flashcards) {
-      if (!card.front_text.trim() || !card.back_text.trim()) {
-        alert("Each card must have front and back text");
+    for (const card of formData.cards) {
+      if (!card.term.trim() || !card.definition.trim()) {
+        alert("Mỗi thẻ phải có cả Thuật ngữ và Định nghĩa");
         return false;
       }
     }
@@ -124,10 +133,10 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
       const setPayload = {
         title: formData.title,
         description: formData.description,
-        source_type: formData.source_type,
-        category_id: formData.category?.id && Number(formData.category.id) > 0 ? formData.category.id : null,
-        exam_id: formData.quiz_id,
-        color: formData.color,
+        visibility: formData.visibility,
+        sourceType: formData.sourceType,
+        categoryId: formData.categoryId,
+        examId: formData.examId,
         status: formData.status,
       };
 
@@ -136,7 +145,7 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
       if (isEdit && setId) {
         await updateFlashcardSet(setId, setPayload);
       } else {
-        const response = await createFlashcardSet(setPayload) as any;
+        const response = (await createFlashcardSet(setPayload)) as any;
         // Extract ID (handling potential wrapped response from Laravel)
         setId = response.id || response.data?.id;
       }
@@ -145,29 +154,33 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
       if (setId) {
         // Delete removed cards
         if (isEdit) {
-          await Promise.all(deletedCardIds.map(id => deleteFlashcard(id)));
+          await Promise.all(deletedCardIds.map((id) => deleteFlashcard(id)));
         }
 
         // Update/Create current cards
-        await Promise.all(formData.flashcards.map(async (card) => {
-          const cardPayload = {
-            front_text: card.front_text,
-            back_text: card.back_text,
-            explanation: card.explanation,
-            flashcard_set_id: setId, // Explicitly include set ID
-          };
+        await Promise.all(
+          formData.cards.map(async (card) => {
+            const cardPayload = {
+              term: card.term,
+              definition: card.definition,
+              explanation: card.explanation,
+            };
 
-          try {
-            if (card.id) {
-              return await updateFlashcard(card.id, cardPayload);
-            } else {
-              return await createFlashcard(setId!, cardPayload);
+            try {
+              if (card.id) {
+                return await updateFlashcard(card.id, cardPayload);
+              } else {
+                return await createFlashcard(setId!, cardPayload);
+              }
+            } catch (error: any) {
+              console.error(
+                "Flashcard Save Error Detail:",
+                error.response?.data || error,
+              );
+              throw error;
             }
-          } catch (error: any) {
-            console.error("Flashcard Save Error Detail:", error.response?.data || error);
-            throw error;
-          }
-        }));
+          }),
+        );
       }
 
       router.push("/admin/flashcards");
@@ -180,32 +193,32 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
     }
   };
 
-  if (isLoading) return <DataLoading text="Loading form data..." />;
+  if (isLoading) return <DataLoading text="Đang tải dữ liệu..." />;
 
   const sourceTypeOptions = [
-    { value: "manual", label: "Manual" },
-    { value: "ai_generated", label: "AI Generated" },
-    { value: "quiz_wrong_answers", label: "Quiz Wrong Answers" },
+    { value: "manual", label: "Thủ công" },
+    { value: "ai_generated", label: "Tạo bởi AI" },
+    { value: "quiz_wrong_answers", label: "Câu trả lời sai" },
   ];
 
   const statusOptions = [
-    { value: "draft", label: "Draft" },
-    { value: "pending", label: "Pending" },
-    { value: "published", label: "Published" },
-    { value: "rejected", label: "Rejected" },
-    { value: "archived", label: "Archived" },
+    { value: "draft", label: "Nháp" },
+    { value: "published", label: "Xuất bản" },
+    { value: "archived", label: "Lưu trữ" },
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+    <div className="mx-auto space-y-8 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {isEdit ? "Edit Flashcard Set" : "Create New Flashcard Set"}
+            {isEdit ? "Chỉnh sửa bộ thẻ" : "Thêm bộ thẻ mới"}
           </h1>
           <p className="text-gray-500 mt-1">
-            {isEdit ? "Update your flashcard set details and cards" : "Define a new set of flashcards for learning"}
+            {isEdit
+              ? "Cập nhật thông tin và nội dung của bộ thẻ flashcards"
+              : "Tạo một bộ thẻ flashcards mới để giúp người dùng ôn tập hiệu quả"}
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -213,7 +226,7 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
             onClick={() => router.back()}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            Thoát
           </button>
           <button
             onClick={handleSubmit}
@@ -222,16 +235,31 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
           >
             {isSaving ? (
               <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
-                Saving...
+                Đang lưu...
               </span>
             ) : (
               <>
                 <Save className="w-5 h-5 mr-2" />
-                Save Set
+                Lưu bộ thẻ
               </>
             )}
           </button>
@@ -244,20 +272,22 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-6">
             <div className="flex items-center space-x-2 border-b border-gray-100 pb-4">
               <Layers className="w-5 h-5 text-indigo-500" />
-              <h2 className="text-lg font-semibold text-gray-800">General Information</h2>
+              <h2 className="text-lg font-semibold text-gray-800">
+                Thông tin bộ thẻ
+              </h2>
             </div>
-            
+
             <FormInput
-              label="Title"
+              label="Tiêu đề"
               name="title"
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g., JavaScript Fundamentals"
               required
             />
-            
+
             <FormTextarea
-              label="Description"
+              label="Mô tả"
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -267,31 +297,31 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormSelect
-                label="Category"
-                name="category_id"
-                value={formData.category?.id?.toString() || ""}
+                label="Danh mục"
+                name="categoryId"
+                value={formData.categoryId?.toString() || ""}
                 onChange={(e) => {
                   const catId = parseInt(e.target.value);
-                  const selectedCat = categories.find(c => c.id === catId);
-                  if (selectedCat) {
-                    setFormData(prev => ({ ...prev, category: selectedCat }));
-                  }
+                  setFormData((prev) => ({
+                    ...prev,
+                    categoryId: Number.isNaN(catId) ? null : catId,
+                  }));
                 }}
-                options={categories.map(c => ({ value: c.id.toString(), label: c.name }))}
+                options={categories.map((c) => ({
+                  value: c.id.toString(),
+                  label: c.name,
+                }))}
               />
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">Set Color</label>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="color"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleChange}
-                    className="h-10 w-20 p-1 rounded-lg border border-gray-300 cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-500 uppercase font-mono">{formData.color}</span>
-                </div>
-              </div>
+              <FormSelect
+                label="Hiển thị"
+                name="visibility"
+                value={formData.visibility}
+                onChange={handleChange}
+                options={[
+                  { value: "public", label: "Công khai" },
+                  { value: "private", label: "Riêng tư" },
+                ]}
+              />
             </div>
           </div>
 
@@ -300,7 +330,9 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Info className="w-5 h-5 text-indigo-500" />
-                <h2 className="text-lg font-semibold text-gray-800">Flashcards ({formData.flashcards.length})</h2>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Số thẻ ({formData.cards.length})
+                </h2>
               </div>
               <button
                 type="button"
@@ -308,13 +340,16 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
                 className="flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 font-medium rounded-lg hover:bg-indigo-100 transition-colors"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Card
+                Thêm thẻ mới
               </button>
             </div>
 
             <div className="space-y-4">
-              {formData.flashcards.map((card, index) => (
-                <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 relative group animate-in fade-in slide-in-from-bottom-2 duration-300">
+              {formData.cards.map((card, index) => (
+                <div
+                  key={index}
+                  className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 relative group animate-in fade-in slide-in-from-bottom-2 duration-300"
+                >
                   <div className="absolute -left-3 top-6 w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold text-sm shadow-sm">
                     {index + 1}
                   </div>
@@ -329,20 +364,24 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                     <div className="space-y-4">
                       <FormTextarea
-                        label="Front Side"
-                        value={card.front_text}
-                        onChange={(e) => handleCardChange(index, "front_text", e.target.value)}
-                        placeholder="Question or Term..."
+                        label="Mặt trước"
+                        value={card.term}
+                        onChange={(e) =>
+                          handleCardChange(index, "term", e.target.value)
+                        }
+                        placeholder="Câu hỏi hoặc Thuật ngữ..."
                         rows={3}
                         required
                       />
                     </div>
                     <div className="space-y-4">
                       <FormTextarea
-                        label="Back Side"
-                        value={card.back_text}
-                        onChange={(e) => handleCardChange(index, "back_text", e.target.value)}
-                        placeholder="Answer or Definition..."
+                        label="Mặt sau"
+                        value={card.definition}
+                        onChange={(e) =>
+                          handleCardChange(index, "definition", e.target.value)
+                        }
+                        placeholder="Câu trả lời hoặc Định nghĩa..."
                         rows={3}
                         required
                       />
@@ -350,23 +389,27 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
                   </div>
                   <div className="mt-4 pt-4 border-t border-gray-50">
                     <FormInput
-                      label="Explanation (Optional)"
+                      label="Ghi chú (tùy chọn)"
                       value={card.explanation || ""}
-                      onChange={(e) => handleCardChange(index, "explanation", e.target.value)}
-                      placeholder="Additional context or memory tip..." name={""}                    />
+                      onChange={(e) =>
+                        handleCardChange(index, "explanation", e.target.value)
+                      }
+                      placeholder="Thêm giải thích hoặc ghi chú cho thẻ này..."
+                      name={""}
+                    />
                   </div>
                 </div>
               ))}
             </div>
 
-            {formData.flashcards.length > 0 && (
+            {formData.cards.length > 0 && (
               <button
                 type="button"
                 onClick={addCard}
                 className="w-full py-4 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center group"
               >
                 <Plus className="w-6 h-6 mr-2 group-hover:scale-125 transition-transform" />
-                <span className="font-medium">Add another flashcard</span>
+                <span className="font-medium">Thêm thẻ khác cho bộ này</span>
               </button>
             )}
           </div>
@@ -375,18 +418,20 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
         {/* Sidebar Settings */}
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-6 sticky top-24">
-            <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-100 pb-4">Settings</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-100 pb-4">
+              Cài đặt nâng cao
+            </h3>
+
             <FormSelect
-              label="Source Type"
-              name="source_type"
-              value={formData.source_type}
+              label="Nguồn tạo"
+              name="sourceType"
+              value={formData.sourceType}
               onChange={handleChange}
               options={sourceTypeOptions}
             />
 
             <FormSelect
-              label="Status"
+              label="Trạng thái"
               name="status"
               value={formData.status || ""}
               onChange={handleChange}
@@ -397,8 +442,12 @@ export default function FlashcardForm({ initialData, isEdit = false }: Flashcard
               <div className="flex items-start space-x-3">
                 <Info className="w-5 h-5 text-amber-600 mt-0.5" />
                 <div className="text-sm text-amber-800">
-                  <p className="font-semibold">Publication Tip</p>
-                  <p className="mt-1">Sets set to "Published" will be immediately visible to users after approval.</p>
+                  <p className="font-semibold">Mẹo xuất bản</p>
+                  <p className="mt-1">
+                    Để bộ thẻ của bạn dễ dàng tiếp cận với người dùng, hãy đặt
+                    trạng thái là "Xuất bản". Chọn trạng thái phù hợp với mục đích của bạn
+                    để tối ưu hóa khả năng tiếp cận và sử dụng bộ thẻ!
+                  </p>
                 </div>
               </div>
             </div>

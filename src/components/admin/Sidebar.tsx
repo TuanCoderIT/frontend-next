@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpenCheck, CopyCheck, House, Menu, File, Users, GraduationCap, SquareMenu, Bolt, ChartLine, Settings } from "lucide-react";
+import { Award, BookOpenCheck, CopyCheck, House, Menu, File, Users, GraduationCap, SquareMenu, Bolt, ChartLine, Settings } from "lucide-react";
 // import Link from "next/link";
 import { Link } from "@lexz451/next-nprogress";
 import { usePathname } from "next/navigation";
@@ -58,6 +58,13 @@ export default function Sidebar() {
       href: "/admin/categories",
       icon: (
         <SquareMenu />
+      ),
+    },
+    {
+      title: "Achievements",
+      href: "/admin/achievements",
+      icon: (
+        <Award />
       ),
     },
     {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import FlashcardDetail from "@/components/admin/flashcards/FlashcardDetail";
-import { FlashcardSet } from "@/types/flashcard";
+import { FlashcardSet } from "@/types/public/flashcard";
 import { getFlashcardSetById } from "@/api/flashcards";
 import { DataLoading } from "@/components/common/LoadingScreen";
 
@@ -27,7 +27,12 @@ export default function FlashcardSetDetailPage() {
   }, [id]);
 
   if (loading) return <DataLoading text="Loading flashcard set details..." />;
-  if (!data) return <div className="text-center py-20 text-gray-500">Flashcard set not found.</div>;
+  if (!data)
+    return (
+      <div className="text-center py-20 text-gray-500">
+        Flashcard set not found.
+      </div>
+    );
 
   return <FlashcardDetail flashcardSet={data} />;
 }

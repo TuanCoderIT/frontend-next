@@ -2,23 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FlashcardSet, FlashcardSetStatus } from "@/types/flashcard";
+import { FlashcardSet, FlashcardSetStatus } from "@/types/public/flashcard";
 import { FlashcardSetFilters } from "@/types/admin/admin";
 import { formatDate } from "@/utils/admin";
 import SearchBar from "@/components/admin/common/SearchBar";
 import FilterSelect from "@/components/admin/common/FilterSelect";
 import ActionButton from "@/components/admin/common/ActionButton";
 import StatusBadge from "@/components/admin/common/StatusBadge";
-import {
-  Layers,
-  Plus,
-  Archive,
-  CheckCircle,
-  XCircle,
-  Eye,
-  Edit,
-  Trash2,
-} from "lucide-react";
+import { Layers, Plus, Archive, CheckCircle } from "lucide-react";
 import CustomLink from "../common/CustomLink";
 import AdminBreadcrumb from "../common/AdminBreadcrumb";
 import {
@@ -31,6 +22,7 @@ import { getCategories } from "@/api/categories";
 import Pagination from "@/components/common/Pagination";
 import { DataLoading } from "@/components/common/LoadingScreen";
 import { Category } from "@/types/admin/admin";
+import PageHeader from "../common/PageHeader";
 
 export default function FlashcardManagement() {
   const router = useRouter();
@@ -43,64 +35,64 @@ export default function FlashcardManagement() {
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    // const fetchInitialData = async () => {
-    //   try {
-    //     const [setsResponse, categoriesResponse] = await Promise.all([
-    //       getFlashcardSets(),
-    //       getCategories()
-    //     ]);
-    //     setFlashcardSets(setsResponse);
-    //     setFilteredSets(setsResponse);
-    //     setCategories(categoriesResponse);
-    //   } catch (error) {
-    //     console.error("Failed to fetch initial data:", error);
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
     const fetchInitialData = async () => {
       try {
-        setIsLoading(true);
-        const [setsRaw, categoriesResponse] = await Promise.all([
+        const [setsResponse, categoriesResponse] = await Promise.all([
           getFlashcardSets(),
           getCategories(),
         ]);
-
-        const setsResponse = setsRaw as any;
-        console.log("Dữ liệu Flashcards nhận về:", setsResponse);
-        // Xử lý bóc tách lớp dữ liệu
-        let finalArray = [];
-
-        // Nếu bạn dùng axiosAPI và return res.data trong file api service:
-        // setsResponse lúc này là { success: true, data: [...] hoặc {data: [...]} }
-
-        if (Array.isArray(setsResponse)) {
-          finalArray = setsResponse;
-        } else if (setsResponse && Array.isArray(setsResponse.data)) {
-          // Trường hợp Laravel trả về ['data' => $sets]
-          finalArray = setsResponse.data;
-        } else if (
-          setsResponse &&
-          setsResponse.data &&
-          Array.isArray(setsResponse.data.data)
-        ) {
-          // Trường hợp Laravel vẫn còn Paginate: ['data' => ['data' => [...]]]
-          finalArray = setsResponse.data.data;
-        }
-
-        const finalCategories = Array.isArray(categoriesResponse) 
-          ? categoriesResponse 
-          : (categoriesResponse as any).data || [];
-
-        setFlashcardSets(finalArray);
-        setFilteredSets(finalArray);
-        setCategories(finalCategories);
+        setFlashcardSets(setsResponse);
+        setFilteredSets(setsResponse);
+        setCategories(categoriesResponse);
       } catch (error) {
         console.error("Failed to fetch initial data:", error);
       } finally {
         setIsLoading(false);
       }
     };
+    // const fetchInitialData = async () => {
+    //   try {
+    //     setIsLoading(true);
+    //     const [setsRaw, categoriesResponse] = await Promise.all([
+    //       getFlashcardSets(),
+    //       getCategories(),
+    //     ]);
+
+    //     const setsResponse = setsRaw as any;
+    //     console.log("Dữ liệu Flashcards nhận về:", setsResponse);
+    //     // Xử lý bóc tách lớp dữ liệu
+    //     let finalArray = [];
+
+    //     // Nếu bạn dùng axiosAPI và return res.data trong file api service:
+    //     // setsResponse lúc này là { success: true, data: [...] hoặc {data: [...]} }
+
+    //     if (Array.isArray(setsResponse)) {
+    //       finalArray = setsResponse;
+    //     } else if (setsResponse && Array.isArray(setsResponse.data)) {
+    //       // Trường hợp Laravel trả về ['data' => $sets]
+    //       finalArray = setsResponse.data;
+    //     } else if (
+    //       setsResponse &&
+    //       setsResponse.data &&
+    //       Array.isArray(setsResponse.data.data)
+    //     ) {
+    //       // Trường hợp Laravel vẫn còn Paginate: ['data' => ['data' => [...]]]
+    //       finalArray = setsResponse.data.data;
+    //     }
+
+    //     const finalCategories = Array.isArray(categoriesResponse)
+    //       ? categoriesResponse
+    //       : (categoriesResponse as any).data || [];
+
+    //     setFlashcardSets(finalArray);
+    //     setFilteredSets(finalArray);
+    //     setCategories(finalCategories);
+    //   } catch (error) {
+    //     console.error("Failed to fetch initial data:", error);
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
 
     fetchInitialData();
   }, []);
@@ -123,9 +115,9 @@ export default function FlashcardManagement() {
       filtered = filtered.filter((set) => set.status === filters.status);
     }
 
-    if (filters.source_type) {
+    if (filters.sourceType) {
       filtered = filtered.filter(
-        (set) => set.source_type === filters.source_type,
+        (set) => set.sourceType === filters.sourceType,
       );
     }
 
@@ -169,12 +161,12 @@ export default function FlashcardManagement() {
   const handleSourceTypeFilter = (sourceType: string) => {
     setFilters((prev) => ({
       ...prev,
-      source_type: sourceType === "all" ? undefined : sourceType,
+      sourceType: sourceType === "all" ? undefined : sourceType,
     }));
   };
 
   const handleDeleteSet = async (set: FlashcardSet) => {
-    if (window.confirm(`Are you sure you want to delete "${set.title}"?`)) {
+    if (window.confirm(`Bạn có chắc muốn xoá bộ thẻ "${set.title}"?`)) {
       try {
         await deleteFlashcardSet(set.id);
         setFlashcardSets((prev) => prev.filter((s) => s.id !== set.id));
@@ -186,14 +178,9 @@ export default function FlashcardManagement() {
   };
 
   const handleUpdateStatus = async (id: number, status: FlashcardSetStatus) => {
-    const action =
-      status === "published"
-        ? "approve"
-        : status === "rejected"
-          ? "reject"
-          : status;
+    const action = status === "published" ? "publish" : status;
     if (
-      window.confirm(`Are you sure you want to ${action} this flashcard set?`)
+      window.confirm(`Bạn có chắc muốn ${action} bộ thẻ này?`)
     ) {
       try {
         const updated = await updateFlashcardSetStatus(id, status);
@@ -209,7 +196,7 @@ export default function FlashcardManagement() {
 
   const handleArchive = async (id: number) => {
     if (
-      window.confirm("Are you sure you want to archive this flashcard set?")
+      window.confirm("Bạn có chắc muốn lưu trữ bộ thẻ này? Bộ thẻ sẽ không hiển thị trên trang người dùng nữa.")
     ) {
       try {
         const updated = await archiveFlashcardSet(id);
@@ -229,58 +216,41 @@ export default function FlashcardManagement() {
   }));
 
   const statusOptions = [
-    { value: "draft", label: "Draft" },
-    { value: "pending", label: "Pending" },
-    { value: "published", label: "Published" },
-    { value: "rejected", label: "Rejected" },
-    { value: "archived", label: "Archived" },
+    { value: "draft", label: "Nháp" },
+    { value: "published", label: "Xuất bản" },
+    { value: "archived", label: "Lưu trữ" },
   ];
 
   const sourceTypeOptions = [
-    { value: "manual", label: "Manual" },
-    { value: "ai_generated", label: "AI Generated" },
-    { value: "quiz_wrong_answers", label: "Quiz Wrong Answers" },
+    { value: "manual", label: "Thủ công" },
+    { value: "ai_generated", label: "Tạo bằng AI" },
+    { value: "quiz_wrong_answers", label: "Câu trả lời sai" },
   ];
 
   if (isLoading) {
-    return <DataLoading text="Loading Flashcard Sets..." />;
+    return <DataLoading text="Đang tải danh sách bộ thẻ..." />;
   }
 
   return (
     <div className="space-y-6">
-      <AdminBreadcrumb currentPage="Flashcards Management" />
+      <AdminBreadcrumb currentPage="Quản lý bộ thẻ" />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Layers className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Flashcards Management
-              </h1>
-              <p className="text-gray-600">
-                Review and manage flashcard sets across the platform
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => router.push("/admin/flashcards/add")}
-            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add New Set
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Quản lý bộ thẻ"
+        icon={<Layers />}
+        actionLabel="Thêm bộ thẻ mới"
+        actionHref="/admin/flashcards/add"
+        actionIcon={<Plus />}
+        bgGradient="from-blue-50 to-indigo-50"
+        buttonGradient="from-blue-500 to-indigo-600"
+      />
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
           <SearchBar
-            placeholder="Search flashcard sets..."
+            placeholder="Tìm kiếm bộ thẻ..."
             onSearch={handleSearch}
             value={filters.search || ""}
           />
@@ -288,19 +258,19 @@ export default function FlashcardManagement() {
             value={filters.category || ""}
             onChange={handleCategoryFilter}
             options={categoryOptions}
-            placeholder="All Categories"
+            placeholder="Tất cả danh mục"
           />
           <FilterSelect
             value={filters.status || ""}
             onChange={handleStatusFilter}
             options={statusOptions}
-            placeholder="All Status"
+            placeholder="Tất cả trạng thái"
           />
           <FilterSelect
-            value={filters.source_type || ""}
+            value={filters.sourceType || ""}
             onChange={handleSourceTypeFilter}
             options={sourceTypeOptions}
-            placeholder="All Source Types"
+            placeholder="Tất cả nguồn tạo"
           />
         </div>
       </div>
@@ -312,25 +282,25 @@ export default function FlashcardManagement() {
             <thead className="bg-blue-50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Flashcard Set
+                  Tên bộ thẻ
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Source
+                  Nguồn tạo
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Category
+                  Danh mục
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Status
+                  Trạng thái
                 </th>
                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Cards
+                  Số thẻ
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Created At
+                  Ngày tạo
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Actions
+                  Hành động
                 </th>
               </tr>
             </thead>
@@ -340,10 +310,7 @@ export default function FlashcardManagement() {
                   <td className="px-6 py-4">
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0">
-                        <div
-                          className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
-                          style={{ backgroundColor: set.color || "#3b82f6" }}
-                        >
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white bg-blue-600">
                           <Layers className="w-5 h-5" />
                         </div>
                       </div>
@@ -360,19 +327,19 @@ export default function FlashcardManagement() {
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        set.source_type === "ai_generated"
+                        set.sourceType === "ai_generated"
                           ? "bg-purple-100 text-purple-800"
-                          : set.source_type === "quiz_wrong_answers"
+                          : set.sourceType === "quiz_wrong_answers"
                             ? "bg-orange-100 text-orange-800"
                             : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {set.source_type}
+                      {set.sourceType}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-gray-800">
-                      {set.category?.name || categories.find(c => c.id === (set as any).category_id)?.name || "N/A"}
+                      {set.category?.name || "Khác"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -380,12 +347,12 @@ export default function FlashcardManagement() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="text-sm font-semibold text-blue-600">
-                      {set.flashcards_count || 0}
+                      {set.cardCount || 0}
                     </div>
-                    <div className="text-xs text-gray-400">cards</div>
+                    <div className="text-xs text-gray-600">thẻ</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {formatDate(set.created_at)}
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {formatDate(set.createdAt)}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
@@ -400,27 +367,16 @@ export default function FlashcardManagement() {
                         type="edit"
                       />
 
-                      {set.status === "pending" && (
-                        <>
-                          <button
-                            onClick={() =>
-                              handleUpdateStatus(set.id, "published")
-                            }
-                            className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
-                            title="Approve"
-                          >
-                            <CheckCircle className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleUpdateStatus(set.id, "rejected")
-                            }
-                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                            title="Reject"
-                          >
-                            <XCircle className="w-5 h-5" />
-                          </button>
-                        </>
+                      {set.status === "draft" && (
+                        <button
+                          onClick={() =>
+                            handleUpdateStatus(set.id, "published")
+                          }
+                          className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                          title="Publish"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                        </button>
                       )}
 
                       {set.status !== "archived" && (

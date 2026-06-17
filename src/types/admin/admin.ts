@@ -86,7 +86,7 @@ export interface CategoryFilters {
 
 export interface FlashcardSetFilters {
   status?: string;
-  source_type?: string;
+  sourceType?: string;
   search?: string;
   category?: string;
 }
