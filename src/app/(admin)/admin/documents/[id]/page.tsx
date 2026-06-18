@@ -1,13 +1,14 @@
 import DocumentDetail from "@/components/admin/documents/DocumentDetail";
 
 interface DocumentDetailPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
-export default function DocumentDetailPage({ params }: DocumentDetailPageProps) {
-    const documentId = parseInt(params.id);
+export default async function DocumentDetailPage({ params }: DocumentDetailPageProps) {
+    const { id } = await params;
+    const documentId = parseInt(id);
 
     return <DocumentDetail documentId={documentId} />;
 }
